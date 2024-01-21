@@ -26,7 +26,7 @@ pub fn establish_connection() -> DbPool {
         pool
     } else {
         // let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-        let database_url = "sqlite://mktour.db".to_string();
+        let database_url = "mktour.db".to_string();
         let manager: ConnectionManager<SqliteConnection> =
             ConnectionManager::<SqliteConnection>::new(&database_url);
 

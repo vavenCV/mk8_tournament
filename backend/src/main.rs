@@ -17,7 +17,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .data(conn_pool.clone())
             .data(JsonConfig::default().limit(4096))
-            .configure(services::user::init_routes)
+            .configure(services::players::init_routes)
+            .configure(services::teams::init_routes)
     })
     .bind("0.0.0.0:5000")?
     .run()
