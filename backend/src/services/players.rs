@@ -8,7 +8,7 @@ pub struct PlayerForm {
 }
 pub fn create(player_form: web::Json<PlayerForm>, pool: web::Data<DbPool>) -> HttpResponse {
     let mut conn = pool.get().unwrap();
-    match Player::create(player_form.name.as_deref(), &mut conn) {
+    match Player::create(&player_form.name.clone().unwrap(), None, &mut conn) {
         Some(user) => HttpResponse::Ok().json(user),
         _ => HttpResponse::InternalServerError().json("Could not create user"),
     }

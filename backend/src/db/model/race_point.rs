@@ -128,19 +128,33 @@ impl RacePoints {
 mod player_test {
     use crate::db::{
         establish_connection,
-        model::{player::Player, race_point::{RacePoints, self}},
+        model::{
+            player::Player,
+            race::Race,
+            race_point::{self, RacePoints},
+        },
     };
     #[test]
     fn create_race_points() {
         let mut conn = establish_connection().get().unwrap();
 
-        let player_name = Some("[GRE] p1");
-        let player = Player::create(player_name, &mut conn).unwrap();
-        let race = Race::create(player_name, &mut conn).unwrap();
+        let player_name = "[GRE] p1";
+        let player_points = 15;
+        let player = Player::create(player_name, None, &mut conn).unwrap();
+        let race = Race::create(None, None, &mut conn).unwrap();
 
-        let race_points = RacePoints::create(player.id, race_id, points, conn)
+        let race_points = RacePoints::create(
+            Some(player.id),
+            Some(race.id),
+            Some(player_points),
+            &mut conn,
+        )
+        .unwrap();
 
-        assert_eq!(player.name.unwrap().as_str(), name.unwrap());
+        let player_from_id = Player::by_id(&race_points.player_id.unwrap(), &conn).unwrap();
+
+        assert_eq!(player_from_id.name, player_name);
+        assert_eq!(race_points.points, Some(player_points));
     }
     // #[test]
     // fn create_player_with_existing_name() {

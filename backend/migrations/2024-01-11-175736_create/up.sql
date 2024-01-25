@@ -31,5 +31,6 @@ CREATE TABLE races (
 -- Create a table with an array of UUIDs
 CREATE TABLE faceoffs (
   	id INTEGER PRIMARY KEY NOT NULL,
-	race_ids TEXT NOT NULL
+	race_ids TEXT NOT NULL,
+	player_ids TEXT NOT NULL
 );

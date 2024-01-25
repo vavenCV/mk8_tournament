@@ -8,6 +8,7 @@ extern crate serde_json;
 // ...
 mod db;
 mod services;
+mod utils;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {

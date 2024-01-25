@@ -61,6 +61,7 @@ impl Player {
             .expect("Error saving new player");
         Self::by_id(&new_id, conn)
     }
+
     fn new_player_struct(id: &i32, team_id: Option<i32>, name: &str) -> Self {
         Player {
             id: *id,

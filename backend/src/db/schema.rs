@@ -4,6 +4,7 @@ diesel::table! {
     faceoffs (id) {
         id -> Integer,
         race_ids -> Text,
+        player_ids -> Text,
     }
 }
 
