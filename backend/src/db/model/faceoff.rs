@@ -85,7 +85,11 @@ impl Faceoff {
         let mut race_ids: Vec<i32> = vec![];
 
         for _race in 0..race_number {
-            race_ids.push(Race::create(Some(new_id), None, conn).unwrap().id);
+            race_ids.push(
+                Race::create(team_ids.clone(), Some(new_id), None, conn)
+                    .unwrap()
+                    .id,
+            );
         }
 
         let new_race = Self::new_faceoff_struct(&new_id, Some(race_ids), Some(team_ids));
@@ -144,41 +148,6 @@ mod faceoff_test {
         utils,
     };
     #[test]
-    // fn create_race() {
-    //     let mut conn = establish_connection().get().unwrap();
-
-    //     let player_name = "[GRE] p1";
-    //     let points = 15;
-
-    //     let player = Player::create(player_name, None, &mut conn).unwrap();
-    //     let mut race = Race::create(None, None, &mut conn).unwrap();
-
-    //     let race_points =
-    //         RacePoints::create(Some(player.id), Some(race.id), Some(points), &mut conn).unwrap();
-
-    //     Race::set_racepoint_ids(race.id, &[race_points.id], &mut conn);
-    //     race = Race::by_id(&race.id, &conn).unwrap();
-
-    //     let faceoff = Faceoff::create(6, [player.id].to_vec(), &mut conn).unwrap();
-
-    //     assert_eq!(race_points.points, Some(points));
-    //     assert_eq!(
-    //         utils::ids::string_to_ids(race.race_point_ids)
-    //             .unwrap()
-    //             .first()
-    //             .unwrap(),
-    //         &race_points.id
-    //     );
-    //     assert_eq!(
-    //         faceoff.id,
-    //         Faceoff::by_team_id(player.id, &mut conn)
-    //             .unwrap()
-    //             .first()
-    //             .unwrap()
-    //             .id
-    //     );
-    // }
-
     fn create_faceoff() {
         let mut conn = establish_connection().get().unwrap();
 
@@ -189,5 +158,9 @@ mod faceoff_test {
         let team_ids = teams.iter().map(|team| team.id).collect::<Vec<i32>>();
 
         let faceoff = Faceoff::create(6, team_ids, &mut conn).unwrap();
+
+        for race_id in utils::ids::string_to_ids(faceoff.race_ids).unwrap() {
+            println!("{:?}", Race::by_id(&race_id, &conn).unwrap());
+        }
     }
 }

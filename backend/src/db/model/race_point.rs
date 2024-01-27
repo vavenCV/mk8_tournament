@@ -132,6 +132,7 @@ mod player_test {
             player::Player,
             race::Race,
             race_point::{self, RacePoints},
+            team::Team,
         },
     };
     #[test]
@@ -140,8 +141,11 @@ mod player_test {
 
         let player_name = "[GRE] p1";
         let player_points = 15;
+
+        let team = Team::create(["P1", "P2", "P3", "P4"], &mut conn).unwrap();
+
         let player = Player::create(player_name, None, &mut conn).unwrap();
-        let race = Race::create(None, None, &mut conn).unwrap();
+        let race = Race::create(vec![team.id], None, None, &mut conn).unwrap();
 
         let race_points = RacePoints::create(
             Some(player.id),

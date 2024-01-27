@@ -10,9 +10,9 @@ use uuid::Uuid;
 
 pub struct Race {
     pub id: i32,
-    pub team_ids: String,
+    pub team_ids: Option<String>,
     pub faceoff_id: Option<i32>,
-    pub race_point_ids: String,
+    pub race_point_ids: Option<String>,
 }
 
 impl Race {
@@ -33,6 +33,20 @@ impl Race {
 
         if let Ok(record) = race_dsl
             .filter(faceoff_id.eq(query_faceoff_id))
+            .load::<Race>(conn)
+        {
+            Some(record)
+        } else {
+            None
+        }
+    }
+
+    /* Get every Race in a faceoff (Circuit 1, 2 ,3 etc) */
+    pub fn by_team_id(query_team_id: &i32, conn: &SqliteConnection) -> Option<Vec<Race>> {
+        use crate::db::schema::races::dsl::team_ids;
+
+        if let Ok(record) = race_dsl
+            .filter(team_ids.like(format!("%{}%", query_team_id)))
             .load::<Race>(conn)
         {
             Some(record)
@@ -76,6 +90,7 @@ impl Race {
     }
 
     pub fn create(
+        team_ids: Vec<i32>,
         faceoff_id: Option<i32>,
         race_point_ids: Option<Vec<i32>>,
         conn: &mut SqliteConnection,
@@ -91,7 +106,7 @@ impl Race {
                 return Some(player);
             }
         }
-        let new_race = Self::new_race_struct(&new_id, faceoff_id, race_point_ids);
+        let new_race = Self::new_race_struct(&new_id, team_ids, faceoff_id, race_point_ids);
 
         diesel::insert_into(race_dsl)
             .values(&new_race)
@@ -102,13 +117,15 @@ impl Race {
 
     fn new_race_struct(
         id: &i32,
+        team_ids: Vec<i32>,
         faceoff_id: Option<i32>,
         race_point_ids: Option<Vec<i32>>,
     ) -> Self {
         Race {
             id: *id,
+            team_ids: Some(utils::ids::ids_to_string(Some(team_ids))),
             faceoff_id: faceoff_id,
-            race_point_ids: utils::ids::ids_to_string(race_point_ids),
+            race_point_ids: Some(utils::ids::ids_to_string(race_point_ids)),
         }
     }
 
@@ -138,7 +155,7 @@ mod player_test {
     use crate::{
         db::{
             establish_connection,
-            model::{player::Player, race::Race, race_point::RacePoints},
+            model::{player::Player, race::Race, race_point::RacePoints, team::Team},
         },
         utils,
     };
@@ -150,7 +167,10 @@ mod player_test {
         let points = 15;
 
         let player = Player::create(player_name, None, &mut conn).unwrap();
-        let mut race = Race::create(None, None, &mut conn).unwrap();
+
+        let team = Team::create(["P1", "P2", "P3", "P4"], &mut conn).unwrap();
+
+        let mut race = Race::create(vec![team.id], None, None, &mut conn).unwrap();
 
         let race_points =
             RacePoints::create(Some(player.id), Some(race.id), Some(points), &mut conn).unwrap();
@@ -160,7 +180,7 @@ mod player_test {
 
         assert_eq!(race_points.points, Some(points));
         assert_eq!(
-            utils::ids::string_to_ids(race.race_point_ids)
+            utils::ids::string_to_ids(race.race_point_ids.unwrap())
                 .unwrap()
                 .first()
                 .unwrap(),
