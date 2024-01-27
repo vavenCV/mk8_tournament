@@ -57,7 +57,7 @@ impl Team {
             .iter()
             .map(|id_str| Player::by_id(&id_str.parse::<i32>().unwrap(), conn).unwrap())
             .collect();
-        let new_team = Self::new_player_struct(&new_id, players);
+        let new_team = Self::new_team_struct(&new_id, players);
 
         diesel::insert_into(team_dsl)
             .values(&new_team)
@@ -65,7 +65,7 @@ impl Team {
             .expect("Error saving new player");
         Self::by_id(&new_id, conn)
     }
-    fn new_player_struct(id: &i32, players: Vec<Player>) -> Self {
+    fn new_team_struct(id: &i32, players: Vec<Player>) -> Self {
         let player_ids = players
             .iter()
             .map(|player| player.id.to_string())

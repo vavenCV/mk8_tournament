@@ -24,13 +24,14 @@ CREATE TABLE race_points (
 -- Create a table with an array of UUIDs
 CREATE TABLE races (
   	id INTEGER PRIMARY KEY NOT NULL,
+	team_ids TEXT,
 	faceoff_id INTEGER,
-	race_point_ids TEXT NOT NULL
+	race_point_ids TEXT
 );
 
 -- Create a table with an array of UUIDs
 CREATE TABLE faceoffs (
   	id INTEGER PRIMARY KEY NOT NULL,
 	race_ids TEXT NOT NULL,
-	player_ids TEXT NOT NULL
+	team_ids TEXT NOT NULL
 );

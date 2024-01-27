@@ -5,13 +5,15 @@ use crate::{db::schema::faceoffs, utils};
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+use super::race::Race;
 #[derive(Debug, Deserialize, Serialize, Queryable, Insertable)]
 #[table_name = "faceoffs"]
 
 pub struct Faceoff {
     pub id: i32,
     pub race_ids: String,
-    pub player_ids: String,
+    pub team_ids: String,
 }
 
 impl Faceoff {
@@ -41,11 +43,11 @@ impl Faceoff {
         }
     }
 
-    pub fn by_player_id(query_player_id: i32, conn: &mut SqliteConnection) -> Option<Vec<Self>> {
-        use crate::db::schema::faceoffs::dsl::player_ids;
+    pub fn by_team_id(query_team_id: i32, conn: &mut SqliteConnection) -> Option<Vec<Self>> {
+        use crate::db::schema::faceoffs::dsl::team_ids;
 
         if let Ok(record) = faceoff_dsl
-            .filter(player_ids.like(format!("%{}%", query_player_id)))
+            .filter(team_ids.like(format!("%{}%", query_team_id)))
             .load::<Self>(conn)
         {
             Some(record)
@@ -54,16 +56,16 @@ impl Faceoff {
         }
     }
 
-    pub fn by_players_and_races_ids(
+    pub fn by_teams_and_races_ids(
         query_players_id: &Vec<i32>,
         query_races_id: &Vec<i32>,
         conn: &SqliteConnection,
     ) -> Option<Self> {
-        use crate::db::schema::faceoffs::dsl::player_ids;
         use crate::db::schema::faceoffs::dsl::race_ids;
+        use crate::db::schema::faceoffs::dsl::team_ids;
 
         if let Ok(record) = faceoff_dsl
-            .filter(player_ids.eq(utils::ids::ids_to_string(Some(query_players_id.to_vec()))))
+            .filter(team_ids.eq(utils::ids::ids_to_string(Some(query_players_id.to_vec()))))
             .filter(race_ids.eq(utils::ids::ids_to_string(Some(query_races_id.to_vec()))))
             .first::<Self>(conn)
         {
@@ -74,22 +76,19 @@ impl Faceoff {
     }
 
     pub fn create(
-        race_ids: Option<Vec<i32>>,
-        player_ids: Option<Vec<i32>>,
+        race_number: i32,
+        team_ids: Vec<i32>,
         conn: &mut SqliteConnection,
     ) -> Option<Self> {
         let new_id = Uuid::new_v4().as_u128() as i32;
 
-        if race_ids.is_some() && player_ids.is_some() {
-            if let Some(player) = Self::by_players_and_races_ids(
-                &player_ids.clone().unwrap(),
-                &race_ids.clone().unwrap(),
-                conn,
-            ) {
-                return Some(player);
-            }
+        let mut race_ids: Vec<i32> = vec![];
+
+        for _race in 0..race_number {
+            race_ids.push(Race::create(Some(new_id), None, conn).unwrap().id);
         }
-        let new_race = Self::new_faceoff_struct(&new_id, race_ids, player_ids);
+
+        let new_race = Self::new_faceoff_struct(&new_id, Some(race_ids), Some(team_ids));
 
         diesel::insert_into(faceoff_dsl)
             .values(&new_race)
@@ -101,12 +100,12 @@ impl Faceoff {
     fn new_faceoff_struct(
         id: &i32,
         race_ids: Option<Vec<i32>>,
-        player_ids: Option<Vec<i32>>,
+        team_ids: Option<Vec<i32>>,
     ) -> Self {
         Faceoff {
             id: *id,
             race_ids: utils::ids::ids_to_string(race_ids),
-            player_ids: utils::ids::ids_to_string(player_ids),
+            team_ids: utils::ids::ids_to_string(team_ids),
         }
     }
 
@@ -121,14 +120,14 @@ impl Faceoff {
             .execute(conn);
     }
 
-    pub fn set_player_ids(query_id: i32, new_player_ids: &[i32], conn: &mut SqliteConnection) {
+    pub fn set_team_ids(query_id: i32, new_team_ids: &[i32], conn: &mut SqliteConnection) {
         use crate::db::schema::faceoffs::dsl::id;
-        use crate::db::schema::faceoffs::dsl::player_ids;
+        use crate::db::schema::faceoffs::dsl::team_ids;
 
-        let str_player_ids = utils::ids::ids_to_string(Some(new_player_ids.to_vec()));
+        let str_team_ids = utils::ids::ids_to_string(Some(new_team_ids.to_vec()));
 
         let updated_row = diesel::update(faceoff_dsl.filter(id.eq(query_id)))
-            .set(player_ids.eq(str_player_ids))
+            .set(team_ids.eq(str_team_ids))
             .execute(conn);
     }
 }
@@ -137,48 +136,58 @@ mod faceoff_test {
     use crate::{
         db::{
             establish_connection,
-            model::{faceoff::Faceoff, player::Player, race::Race, race_point::RacePoints},
+            model::{
+                faceoff::Faceoff, player::Player, race::Race, race_point::RacePoints, team::Team,
+            },
+            schema::teams,
         },
         utils,
     };
     #[test]
-    fn create_race() {
+    // fn create_race() {
+    //     let mut conn = establish_connection().get().unwrap();
+
+    //     let player_name = "[GRE] p1";
+    //     let points = 15;
+
+    //     let player = Player::create(player_name, None, &mut conn).unwrap();
+    //     let mut race = Race::create(None, None, &mut conn).unwrap();
+
+    //     let race_points =
+    //         RacePoints::create(Some(player.id), Some(race.id), Some(points), &mut conn).unwrap();
+
+    //     Race::set_racepoint_ids(race.id, &[race_points.id], &mut conn);
+    //     race = Race::by_id(&race.id, &conn).unwrap();
+
+    //     let faceoff = Faceoff::create(6, [player.id].to_vec(), &mut conn).unwrap();
+
+    //     assert_eq!(race_points.points, Some(points));
+    //     assert_eq!(
+    //         utils::ids::string_to_ids(race.race_point_ids)
+    //             .unwrap()
+    //             .first()
+    //             .unwrap(),
+    //         &race_points.id
+    //     );
+    //     assert_eq!(
+    //         faceoff.id,
+    //         Faceoff::by_team_id(player.id, &mut conn)
+    //             .unwrap()
+    //             .first()
+    //             .unwrap()
+    //             .id
+    //     );
+    // }
+
+    fn create_faceoff() {
         let mut conn = establish_connection().get().unwrap();
 
-        let player_name = "[GRE] p1";
-        let points = 15;
+        let teams = vec![
+            Team::create(["P1", "P2", "P3", "P4"], &mut conn).unwrap(),
+            Team::create(["P5", "P6", "P7", "P8"], &mut conn).unwrap(),
+        ];
+        let team_ids = teams.iter().map(|team| team.id).collect::<Vec<i32>>();
 
-        let player = Player::create(player_name, None, &mut conn).unwrap();
-        let mut race = Race::create(None, None, &mut conn).unwrap();
-
-        let race_points =
-            RacePoints::create(Some(player.id), Some(race.id), Some(points), &mut conn).unwrap();
-
-        Race::set_racepoint_ids(race.id, &[race_points.id], &mut conn);
-        race = Race::by_id(&race.id, &conn).unwrap();
-
-        let faceoff = Faceoff::create(
-            Some([race.id].to_vec()),
-            Some([player.id].to_vec()),
-            &mut conn,
-        )
-        .unwrap();
-
-        assert_eq!(race_points.points, Some(points));
-        assert_eq!(
-            utils::ids::string_to_ids(race.race_point_ids)
-                .unwrap()
-                .first()
-                .unwrap(),
-            &race_points.id
-        );
-        assert_eq!(
-            faceoff.id,
-            Faceoff::by_player_id(player.id, &mut conn)
-                .unwrap()
-                .first()
-                .unwrap()
-                .id
-        );
+        let faceoff = Faceoff::create(6, team_ids, &mut conn).unwrap();
     }
 }

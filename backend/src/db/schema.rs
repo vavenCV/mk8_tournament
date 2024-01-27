@@ -4,7 +4,7 @@ diesel::table! {
     faceoffs (id) {
         id -> Integer,
         race_ids -> Text,
-        player_ids -> Text,
+        team_ids -> Text,
     }
 }
 
@@ -28,8 +28,9 @@ diesel::table! {
 diesel::table! {
     races (id) {
         id -> Integer,
+        team_ids -> Nullable<Text>,
         faceoff_id -> Nullable<Integer>,
-        race_point_ids -> Text,
+        race_point_ids -> Nullable<Text>,
     }
 }
 

@@ -10,6 +10,7 @@ use uuid::Uuid;
 
 pub struct Race {
     pub id: i32,
+    pub team_ids: String,
     pub faceoff_id: Option<i32>,
     pub race_point_ids: String,
 }
@@ -42,12 +43,6 @@ impl Race {
 
     pub fn by_racepoint_id(query_racepoint_id: &i32, conn: &SqliteConnection) -> Option<Race> {
         use crate::db::schema::races::dsl::race_point_ids;
-
-        // let str_race_point_ids = utils::ids::ids_to_string(Some(query_race_point_ids.to_vec()));
-
-        // let result =
-        // .first::<MyTable>(conn)
-        // .optional()?;
 
         if let Ok(record) = race_dsl
             .filter(race_point_ids.like(format!("%{}%", query_racepoint_id)))
