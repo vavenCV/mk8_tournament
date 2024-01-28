@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use super::race::Race;
+use super::team::Team;
 #[derive(Debug, Deserialize, Serialize, Queryable, Insertable)]
 #[table_name = "faceoffs"]
 
@@ -81,6 +82,17 @@ impl Faceoff {
         conn: &mut SqliteConnection,
     ) -> Option<Self> {
         let new_id = Uuid::new_v4().as_u128() as i32;
+
+        // Check for teams
+        for team_id in team_ids.clone() {
+            match Team::by_id(&team_id, conn) {
+                Some(_team) => {}
+                None => {
+                    println!("Unknown team_id: {}", team_id);
+                    return None;
+                }
+            };
+        }
 
         let mut race_ids: Vec<i32> = vec![];
 

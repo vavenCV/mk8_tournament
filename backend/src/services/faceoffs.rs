@@ -35,9 +35,9 @@ pub fn get(id: web::Path<i32>, pool: web::Data<DbPool>) -> HttpResponse {
 pub fn update(id: web::Path<i32>, faceoff_form: web::Json<FaceoffForm>, pool: web::Data<DbPool>) {}
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     /*
-     * index: curl -i -X GET -H "Content-Type: application/json" http://localhost:5000/users
-     * get: curl -i -X GET -H "Content-Type: application/json" http://localhost:5000/users/<id>
-     * post: curl -i -X POST -H "Content-Type: application/json" -d '{"email":"xxx"}' http://localhost:5000/users
+     * index: curl -i -X GET -H "Content-Type: application/json" http://localhost:5000/faceoffs
+     * get: curl -i -X GET -H "Content-Type: application/json" http://localhost:5000/faceoffs/<id>
+     * post: curl -i -X POST -H "Content-Type: application/json" -d '{"race_number":6, "team_ids": [X, Y, Z]}' http://localhost:5000/faceoffs
      */
 
     cfg.service(
@@ -48,17 +48,3 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
     )
     .service(web::scope("/faceoffs").route("/{id}", web::get().to(get)));
 }
-
-// #[cfg(test)]
-// mod faceoff_service_test {
-//     use super::{create, FaceoffForm};
-
-//     #[test]
-//     fn create_faceoff() {
-//         let form = FaceoffForm {
-//             race_number: 6,
-//             team_ids: [1, 2, 3],
-//         };
-//         create(faceoff_form, pool);
-//     }
-// }

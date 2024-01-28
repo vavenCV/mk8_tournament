@@ -16,9 +16,9 @@ CREATE TABLE teams (
 -- Create a table with an array of UUIDs
 CREATE TABLE race_points (
   	id INTEGER PRIMARY KEY NOT NULL,
-	race_id INTEGER,
-  	player_id INTEGER,
-	points INTEGER
+	race_id INTEGER NOT NULL,
+  	player_id INTEGER NOT NULL,
+	points INTEGER NOT NULL
 );
 
 -- Create a table with an array of UUIDs

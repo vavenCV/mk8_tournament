@@ -172,13 +172,12 @@ mod player_test {
 
         let mut race = Race::create(vec![team.id], None, None, &mut conn).unwrap();
 
-        let race_points =
-            RacePoints::create(Some(player.id), Some(race.id), Some(points), &mut conn).unwrap();
+        let race_points = RacePoints::create(player.id, race.id, points, &mut conn).unwrap();
 
         Race::set_racepoint_ids(race.id, &[race_points.id], &mut conn);
         race = Race::by_id(&race.id, &conn).unwrap();
 
-        assert_eq!(race_points.points, Some(points));
+        assert_eq!(race_points.points as u8, points);
         assert_eq!(
             utils::ids::string_to_ids(race.race_point_ids.unwrap())
                 .unwrap()

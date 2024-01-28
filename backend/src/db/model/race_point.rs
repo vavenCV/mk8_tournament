@@ -10,9 +10,9 @@ use uuid::Uuid;
 
 pub struct RacePoints {
     pub id: i32,
-    pub race_id: Option<i32>,
-    pub player_id: Option<i32>,
-    pub points: Option<i32>,
+    pub race_id: i32,
+    pub player_id: i32,
+    pub points: i32,
 }
 
 impl RacePoints {
@@ -88,21 +88,18 @@ impl RacePoints {
     }
 
     pub fn create(
-        player_id: Option<i32>,
-        race_id: Option<i32>,
-        points: Option<i32>,
+        player_id: i32,
+        race_id: i32,
+        points: u8,
         conn: &mut SqliteConnection,
     ) -> Option<Self> {
         let new_id = Uuid::new_v4().as_u128() as i32;
 
-        if race_id.is_some() && player_id.is_some() {
-            if let Some(player) =
-                Self::by_player_and_race_id(&player_id.unwrap(), &race_id.unwrap(), conn)
-            {
-                return Some(player);
-            }
+        if let Some(player) = Self::by_player_and_race_id(&player_id, &race_id, conn) {
+            return Some(player);
         }
-        let new_race_points = Self::new_player_struct(&new_id, race_id, player_id, points);
+
+        let new_race_points = Self::new_player_struct(&new_id, race_id, player_id, points.into());
 
         diesel::insert_into(race_points_dsl)
             .values(&new_race_points)
@@ -110,12 +107,7 @@ impl RacePoints {
             .expect("Error saving new new_race_points");
         Self::by_id(&new_id, conn)
     }
-    fn new_player_struct(
-        id: &i32,
-        race_id: Option<i32>,
-        player_id: Option<i32>,
-        points: Option<i32>,
-    ) -> Self {
+    fn new_player_struct(id: &i32, race_id: i32, player_id: i32, points: i32) -> Self {
         RacePoints {
             id: *id,
             race_id: race_id,
@@ -147,18 +139,12 @@ mod player_test {
         let player = Player::create(player_name, None, &mut conn).unwrap();
         let race = Race::create(vec![team.id], None, None, &mut conn).unwrap();
 
-        let race_points = RacePoints::create(
-            Some(player.id),
-            Some(race.id),
-            Some(player_points),
-            &mut conn,
-        )
-        .unwrap();
+        let race_points = RacePoints::create(player.id, race.id, player_points, &mut conn).unwrap();
 
-        let player_from_id = Player::by_id(&race_points.player_id.unwrap(), &conn).unwrap();
+        let player_from_id = Player::by_id(&race_points.player_id, &conn).unwrap();
 
         assert_eq!(player_from_id.name, player_name);
-        assert_eq!(race_points.points, Some(player_points));
+        assert_eq!(race_points.points as u8, player_points);
     }
     // #[test]
     // fn create_player_with_existing_name() {

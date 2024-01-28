@@ -19,9 +19,9 @@ diesel::table! {
 diesel::table! {
     race_points (id) {
         id -> Integer,
-        race_id -> Nullable<Integer>,
-        player_id -> Nullable<Integer>,
-        points -> Nullable<Integer>,
+        race_id -> Integer,
+        player_id -> Integer,
+        points -> Integer,
     }
 }
 
