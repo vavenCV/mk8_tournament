@@ -60,6 +60,9 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
      */
 
     cfg.service(web::resource("/races").route(web::get().to(index)))
-        .service(web::scope("/races").route("/{id}", web::get().to(get)))
-        .service(web::scope("/races").route("/{id}", web::put().to(update)));
+        .service(
+            web::scope("/races")
+                .route("/{id}", web::put().to(update))
+                .route("/{id}", web::get().to(get)),
+        );
 }

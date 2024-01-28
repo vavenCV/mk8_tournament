@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: Sample API
+  description: Optional multiline or single-line description in [CommonMark](http://commonmark.org/help/) or HTML.
+  version: 0.1.9
+servers:
+  - url: http://localhost:5000
+    description: Optional server description, e.g. Main (production) server
+paths:
+  /players:
+    get:
+      summary: Returns a list of players.
+      description: Optional extended description in CommonMark or HTML.
+      responses:
+        "200": # status code
+          description: A JSON array of players
+          content:
+            application/json:
+              example:
+                [
+                  {
+                    "id": -1026797181,
+                    "team_id": 790284319,
+                    "name": "[SOF] p1",
+                  },
+                  {
+                    "id": -326015235,
+                    "team_id": 1650047014,
+                    "name": "[GRE] p4",
+                  },
+                ]
+  /players/{Id}:
+    get:
+      summary: Returns a user by ID.
+      parameters:
+        - name: Id
+          in: path
+          required: true
+          description: Parameter description in CommonMark or HTML.
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200": # status code
+          description: A JSON of player matching the id
+          content:
+            application/json:
+              example:
+                [
+                  {
+                    "id": -326015235,
+                    "team_id": 1650047014,
+                    "name": "[GRE] p4",
+                  },
+                ]

@@ -95,8 +95,8 @@ impl RacePoints {
     ) -> Option<Self> {
         let new_id = Uuid::new_v4().as_u128() as i32;
 
-        if let Some(player) = Self::by_player_and_race_id(&player_id, &race_id, conn) {
-            return Some(player);
+        if let Some(racepoint) = Self::by_player_and_race_id(&player_id, &race_id, conn) {
+            return Some(racepoint);
         }
 
         let new_race_points = Self::new_player_struct(&new_id, race_id, player_id, points.into());
