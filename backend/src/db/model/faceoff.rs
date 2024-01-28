@@ -159,6 +159,7 @@ mod faceoff_test {
 
         let faceoff = Faceoff::create(6, team_ids, &mut conn).unwrap();
 
+        println!("{:?}", teams);
         for race_id in utils::ids::string_to_ids(faceoff.race_ids).unwrap() {
             println!("{:?}", Race::by_id(&race_id, &conn).unwrap());
         }

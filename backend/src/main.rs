@@ -20,6 +20,8 @@ async fn main() -> std::io::Result<()> {
             .data(JsonConfig::default().limit(4096))
             .configure(services::players::init_routes)
             .configure(services::teams::init_routes)
+            .configure(services::faceoffs::init_routes)
+            .configure(services::races::init_routes)
     })
     .bind("0.0.0.0:5000")?
     .run()
