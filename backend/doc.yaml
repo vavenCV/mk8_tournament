@@ -9,8 +9,7 @@ servers:
 paths:
   /players:
     get:
-      summary: Returns a list of players.
-      description: Optional extended description in CommonMark or HTML.
+      summary: Returns all players.
       responses:
         "200": # status code
           description: A JSON array of players
@@ -29,9 +28,88 @@ paths:
                     "name": "[GRE] p4",
                   },
                 ]
+    post:
+      summary: creates a player.
+      parameters:
+        - name: name
+          in: body
+          required: true
+          description: Name of the player
+          schema:
+            type: string
+            format: utf8
+            example: { "name": "[GRE] p1" }
+      responses:
+        "200": # status code
+          description: A JSON of the created player
+
   /players/{Id}:
     get:
       summary: Returns a user by ID.
+      parameters:
+        - name: Id
+          in: path
+          required: true
+          description: Id of the player.
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200": # status code
+          description: A JSON of player matching the id
+          content:
+            application/json:
+              example:
+                { "id": -326015235, "team_id": 1650047014, "name": "[GRE] p4" }
+  /teams:
+    get:
+      summary: Returns all teams.
+      responses:
+        "200": # status code
+          description: A JSON of player matching the id
+          content:
+            application/json:
+              example:
+                [
+                  {
+                    "id": 790284319,
+                    "player_ids": "-959482049;-112902154;-1026797181;1237765841",
+                  },
+                  {
+                    "id": 1439906126,
+                    "player_ids": "-469872453;-326015235;1431639362;1555480604",
+                  },
+                ]
+    post:
+      summary: creates a team.
+      parameters:
+        - name: player_names
+          in: body
+          required: true
+          description: Names of the players
+          schema:
+            type: array
+            items:
+              type: string
+              format: utf8
+              example:
+                {
+                  "player_names":
+                    ["[GRE] p1", "[GRE] p2", "[GRE] p3", "[GRE] p4"],
+                }
+      responses:
+        "200": # status code
+          description: A JSON of the created team
+          content:
+            application/json:
+              example:
+                {
+                  "id": 790284319,
+                  "player_ids": "-959482049;-112902154;-1026797181;1237765841",
+                }
+  /teams/{Id}:
+    get:
+      summary: Returns a team by ID.
       parameters:
         - name: Id
           in: path
@@ -42,14 +120,106 @@ paths:
             format: int32
       responses:
         "200": # status code
+          description: A JSON of team matching the id
+          content:
+            application/json:
+              example:
+                {
+                  "id": 790284319,
+                  "player_ids": "-959482049;-112902154;-1026797181;1237765841",
+                }
+  /races:
+    get:
+      summary: Returns all teams.
+      responses:
+        "200": # status code
           description: A JSON of player matching the id
           content:
             application/json:
               example:
                 [
                   {
-                    "id": -326015235,
-                    "team_id": 1650047014,
-                    "name": "[GRE] p4",
+                    "id": 790284319,
+                    "player_ids": "-959482049;-112902154;-1026797181;1237765841",
+                  },
+                  {
+                    "id": 1439906126,
+                    "player_ids": "-469872453;-326015235;1431639362;1555480604",
+                  },
+                ]
+  /races/{Id}:
+    get:
+      summary: Returns a race by ID.
+      parameters:
+        - name: Id
+          in: path
+          required: true
+          description: Id of the race.
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200": # status code
+          description: A JSON of race matching the id
+          content:
+            application/json:
+              example:
+                [
+                  {
+                    "id": -1798837048,
+                    "team_ids": "790284319;1439906126;1650047014",
+                    "faceoff_id": 1518722312,
+                    "race_point_ids": "",
+                  },
+                  {
+                    "id": -1607695505,
+                    "team_ids": "790284319;1439906126;1650047014",
+                    "faceoff_id": 1518722312,
+                    "race_point_ids": "",
+                  },
+                ]
+    put:
+      summary: add points for players in race that matches Id.
+      parameters:
+        - name: Id
+          in: path
+          required: true
+          description: Parameter description in CommonMark or HTML.
+          schema:
+            type: integer
+            format: int32
+        - name: race_points
+          in: body
+          required: true
+          description: points of players in race
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                player_id:
+                  type: string
+                points:
+                  type: integer
+            example:
+              {
+                "player_names":
+                  [
+                    { "player_id": 1431639362, points: 15 },
+                    { "player_id": 1555480604, points: 12 },
+                  ],
+              }
+      responses:
+        "200": # status code
+          description: A JSON of race matching the id
+          content:
+            application/json:
+              example:
+                [
+                  {
+                    "id": -1798837048,
+                    "team_ids": "790284319;1439906126;1650047014",
+                    "faceoff_id": 1518722312,
+                    "race_point_ids": "469872453;-326015235",
                   },
                 ]
