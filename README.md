@@ -1,5 +1,8 @@
 # mk8_tournament
 
+# Dependencies
+libsql3: `sudo apt install libsqlite3-dev`
+
 # DEV
 cargo install diesel_cli --no-default-features --features sqlite
 
