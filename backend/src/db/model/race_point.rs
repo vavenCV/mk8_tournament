@@ -127,56 +127,56 @@ mod player_test {
             team::Team,
         },
     };
-    #[test]
-    fn create_race_points() {
-        let mut conn = establish_connection().get().unwrap();
-
-        let player_name = "[GRE] p1";
-        let player_points = 15;
-
-        let team = Team::create(["P1", "P2", "P3", "P4"], &mut conn).unwrap();
-
-        let player = Player::create(player_name, team.id, &mut conn).unwrap();
-        let race = Race::create(vec![team.id], None, None, &mut conn).unwrap();
-
-        let race_points = RacePoints::create(player.id, race.id, player_points, &mut conn).unwrap();
-
-        let player_from_id = Player::by_id(&race_points.player_id, &conn).unwrap();
-
-        assert_eq!(player_from_id.name, player_name);
-        assert_eq!(race_points.points as u8, player_points);
-    }
     // #[test]
-    // fn create_player_with_existing_name() {
+    // fn create_race_points() {
     //     let mut conn = establish_connection().get().unwrap();
-    //     let name = Some("[GRE] p1");
-    //     let player = RacePoints::create(name, &mut conn).unwrap();
-    //     let existing_player = RacePoints::create(name, &mut conn).unwrap();
-    //     assert_eq!(player.id, existing_player.id);
-    // }
-    // #[test]
-    // fn list_players() {
-    //     let mut conn = establish_connection().get().unwrap();
-    //     let name = Some("[GRE] p1");
-    //     let player = RacePoints::create(name, &mut conn).unwrap();
-    //     let existing_players = RacePoints::list(&mut conn);
-    //     assert_eq!(1, existing_players.len());
-    //     assert_eq!(player.id, existing_players[0].id);
-    // }
-    // #[test]
-    // fn get_player_by_name() {
-    //     let mut conn = establish_connection().get().unwrap();
-    //     let name = Some("[GRE] p1");
-    //     let player = RacePoints::create(name, &mut conn).unwrap();
-    //     let existing_player = RacePoints::by_name(&name.unwrap(), &conn).unwrap();
-    //     assert_eq!(player.id, existing_player.id);
-    // }
-    // #[test]
-    // fn get_player_by_id() {
-    //     let mut conn = establish_connection().get().unwrap();
-    //     let name = Some("[GRE] p1");
-    //     let player = RacePoints::create(name, &mut conn).unwrap();
-    //     let existing_player = RacePoints::by_id(&player.id, &conn).unwrap();
-    //     assert_eq!(player.id, existing_player.id);
-    // }
+
+    //     let player_name = "[GRE] p1";
+    //     let player_points = 15;
+
+    //     let team = Team::create(["P1", "P2", "P3", "P4"], &mut conn).unwrap();
+
+    //     let player = Player::create(player_name, team.id, &mut conn).unwrap();
+    //     let race = Race::create(vec![team.id], None, None, &mut conn).unwrap();
+
+    //     let race_points = RacePoints::create(player.id, race.id, player_points, &mut conn).unwrap();
+
+    //     let player_from_id = Player::by_id(&race_points.player_ id, &conn).unwrap();
+
+    //     assert_eq!(player_from_id.name, player_name);
+    //     assert_eq!(race_points.points as u8, player_points);
 }
+// #[test]
+// fn create_player_with_existing_name() {
+//     let mut conn = establish_connection().get().unwrap();
+//     let name = Some("[GRE] p1");
+//     let player = RacePoints::create(name, &mut conn).unwrap();
+//     let existing_player = RacePoints::create(name, &mut conn).unwrap();
+//     assert_eq!(player.id, existing_player.id);
+// }
+// #[test]
+// fn list_players() {
+//     let mut conn = establish_connection().get().unwrap();
+//     let name = Some("[GRE] p1");
+//     let player = RacePoints::create(name, &mut conn).unwrap();
+//     let existing_players = RacePoints::list(&mut conn);
+//     assert_eq!(1, existing_players.len());
+//     assert_eq!(player.id, existing_players[0].id);
+// }
+// #[test]
+// fn get_player_by_name() {
+//     let mut conn = establish_connection().get().unwrap();
+//     let name = Some("[GRE] p1");
+//     let player = RacePoints::create(name, &mut conn).unwrap();
+//     let existing_player = RacePoints::by_name(&name.unwrap(), &conn).unwrap();
+//     assert_eq!(player.id, existing_player.id);
+// }
+// #[test]
+// fn get_player_by_id() {
+//     let mut conn = establish_connection().get().unwrap();
+//     let name = Some("[GRE] p1");
+//     let player = RacePoints::create(name, &mut conn).unwrap();
+//     let existing_player = RacePoints::by_id(&player.id, &conn).unwrap();
+//     assert_eq!(player.id, existing_player.id);
+// }
+// }

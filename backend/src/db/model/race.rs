@@ -188,11 +188,14 @@ impl Race {
                     .ok_or("unknown race_point id")?
                     .id)
             })
-            .collect::<Vec<Result<i32, Box<dyn Error>>>>();
+            .collect::<Result<Vec<i32>, Box<dyn Error>>>()?;
         for team_id in utils::ids::string_to_ids(race.team_ids.ok_or("no team in race")?)? {
             let team = Team::by_id(&team_id, conn).ok_or("unknown team_id")?;
             for player_id in utils::ids::string_to_ids(team.player_ids)? {
                 // race_point_ids.con
+                if !player_ids_with_points.contains(&player_id) {
+                    return Ok(false);
+                }
             }
         }
 

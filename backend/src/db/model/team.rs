@@ -1,6 +1,6 @@
 use super::player::Player;
-use crate::{db::schema::teams, utils};
 use crate::db::schema::teams::dsl::teams as team_dsl;
+use crate::{db::schema::teams, utils};
 use diesel::prelude::*;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
@@ -19,7 +19,10 @@ impl Serialize for Team {
         // 3 is the number of fields in the struct.
         let mut state = serializer.serialize_struct("Team", 3)?;
         state.serialize_field("id", &self.id)?;
-        state.serialize_field("player_ids", &utils::ids::string_to_ids(self.player_ids.clone()).unwrap())?;
+        state.serialize_field(
+            "player_ids",
+            &utils::ids::string_to_ids(self.player_ids.clone()).unwrap(),
+        )?;
         state.end()
     }
 }
