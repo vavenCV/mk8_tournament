@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::error::Error;
 
 use crate::db::schema::races::dsl::races as race_dsl;
 use crate::{db::schema::races, utils};
@@ -6,6 +7,9 @@ use diesel::prelude::*;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
 use uuid::Uuid;
+
+use super::race_point::RacePoints;
+use super::team::Team;
 #[derive(Debug, Deserialize, Queryable, Insertable)]
 #[table_name = "races"]
 
@@ -23,9 +27,15 @@ impl Serialize for Race {
         // 3 is the number of fields in the struct.
         let mut state = serializer.serialize_struct("Race", 3)?;
         state.serialize_field("id", &self.id)?;
-        state.serialize_field("team_ids", &utils::ids::string_to_ids(self.team_ids.clone().unwrap()).unwrap())?;
+        state.serialize_field(
+            "team_ids",
+            &utils::ids::string_to_ids(self.team_ids.clone().unwrap()).unwrap(),
+        )?;
         state.serialize_field("faceoff_id", &self.faceoff_id)?;
-        state.serialize_field("race_point_ids", &utils::ids::string_to_ids(self.race_point_ids.clone().unwrap()).unwrap())?;
+        state.serialize_field(
+            "race_point_ids",
+            &utils::ids::string_to_ids(self.race_point_ids.clone().unwrap()).unwrap(),
+        )?;
         state.end()
     }
 }
@@ -162,6 +172,31 @@ impl Race {
         let updated_row = diesel::update(race_dsl.filter(id.eq(query_id)))
             .set(race_point_ids.eq(str_racepoint_ids))
             .execute(conn);
+    }
+
+    pub fn are_all_points_entered(
+        query_id: &i32,
+        conn: &mut SqliteConnection,
+    ) -> Result<bool, Box<dyn Error>> {
+        let race = Self::by_id(query_id, conn).ok_or("unknown id")?;
+        let race_point_ids =
+            utils::ids::string_to_ids(race.race_point_ids.ok_or("no race points in race")?)?;
+        let player_ids_with_points = race_point_ids
+            .iter()
+            .map(|rp_id| -> Result<i32, Box<dyn Error>> {
+                Ok(RacePoints::by_id(rp_id, conn)
+                    .ok_or("unknown race_point id")?
+                    .id)
+            })
+            .collect::<Vec<Result<i32, Box<dyn Error>>>>();
+        for team_id in utils::ids::string_to_ids(race.team_ids.ok_or("no team in race")?)? {
+            let team = Team::by_id(&team_id, conn).ok_or("unknown team_id")?;
+            for player_id in utils::ids::string_to_ids(team.player_ids)? {
+                // race_point_ids.con
+            }
+        }
+
+        Ok(true)
     }
 }
 #[cfg(test)]
