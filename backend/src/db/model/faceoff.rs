@@ -1,5 +1,7 @@
 use std::collections::HashMap;
+use std::error::Error;
 
+use crate::db::model::team;
 use crate::db::schema::faceoffs::dsl::faceoffs as faceoff_dsl;
 use crate::{db::schema::faceoffs, utils};
 use diesel::prelude::*;
@@ -14,8 +16,9 @@ use super::team::Team;
 
 pub struct Faceoff {
     pub id: i32,
-    pub race_ids: String,
-    pub team_ids: String,
+    pub race_number: i32,
+    pub race_ids: Option<String>,
+    pub team_ids: Option<String>,
 }
 impl Serialize for Faceoff {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -25,8 +28,8 @@ impl Serialize for Faceoff {
         // 3 is the number of fields in the struct.
         let mut state = serializer.serialize_struct("Faceoff", 3)?;
         state.serialize_field("id", &self.id)?;
-        state.serialize_field("race_ids", &utils::ids::string_to_ids(self.race_ids.clone()).unwrap())?;
-        state.serialize_field("team_ids", &utils::ids::string_to_ids(self.team_ids.clone()).unwrap())?;
+        state.serialize_field("race_ids", &utils::ids::string_to_ids(self.race_ids.clone().unwrap()).unwrap())?;
+        state.serialize_field("team_ids", &utils::ids::string_to_ids(self.team_ids.clone().unwrap()).unwrap())?;
         state.end()
     }
 }
@@ -94,30 +97,9 @@ impl Faceoff {
         team_ids: Vec<i32>,
         conn: &mut SqliteConnection,
     ) -> Option<Self> {
-        let new_id = Uuid::new_v4().as_u128() as i32;
+        let new_id = utils::ids::get_random_unique_id(Faceoff::by_id, conn);
 
-        // Check for teams
-        for team_id in team_ids.clone() {
-            match Team::by_id(&team_id, conn) {
-                Some(_team) => {}
-                None => {
-                    println!("Unknown team_id: {}", team_id);
-                    return None;
-                }
-            };
-        }
-
-        let mut race_ids: Vec<i32> = vec![];
-
-        for _race in 0..race_number {
-            race_ids.push(
-                Race::create(team_ids.clone(), Some(new_id), None, conn)
-                    .unwrap()
-                    .id,
-            );
-        }
-
-        let new_race = Self::new_faceoff_struct(&new_id, Some(race_ids), Some(team_ids));
+        let new_race = Self::new_faceoff_struct(&new_id, &race_number,  None, Some(team_ids));
 
         diesel::insert_into(faceoff_dsl)
             .values(&new_race)
@@ -128,17 +110,19 @@ impl Faceoff {
 
     fn new_faceoff_struct(
         id: &i32,
+        race_number: &i32,
         race_ids: Option<Vec<i32>>,
         team_ids: Option<Vec<i32>>,
     ) -> Self {
         Faceoff {
             id: *id,
-            race_ids: utils::ids::ids_to_string(race_ids),
-            team_ids: utils::ids::ids_to_string(team_ids),
+            race_number: *race_number,
+            race_ids: Some(utils::ids::ids_to_string(race_ids)),
+            team_ids: Some(utils::ids::ids_to_string(team_ids)),
         }
     }
 
-    pub fn set_race_ids(query_id: i32, new_race_ids: &[i32], conn: &mut SqliteConnection) {
+    pub fn set_race_ids(query_id: &i32, new_race_ids: &[i32], conn: &mut SqliteConnection) -> Result<Self, Box<dyn Error>> {
         use crate::db::schema::faceoffs::dsl::id;
         use crate::db::schema::faceoffs::dsl::race_ids;
 
@@ -146,10 +130,12 @@ impl Faceoff {
 
         let updated_row = diesel::update(faceoff_dsl.filter(id.eq(query_id)))
             .set(race_ids.eq(str_race_ids))
-            .execute(conn);
+            .execute(conn)?;
+
+        Ok(Self::by_id(query_id, conn).ok_or("Unknown id")?)
     }
 
-    pub fn set_team_ids(query_id: i32, new_team_ids: &[i32], conn: &mut SqliteConnection) {
+    pub fn set_team_ids(query_id: &i32, new_team_ids: &[i32], conn: &mut SqliteConnection) -> Result<Self, Box<dyn Error>> {
         use crate::db::schema::faceoffs::dsl::id;
         use crate::db::schema::faceoffs::dsl::team_ids;
 
@@ -157,7 +143,32 @@ impl Faceoff {
 
         let updated_row = diesel::update(faceoff_dsl.filter(id.eq(query_id)))
             .set(team_ids.eq(str_team_ids))
-            .execute(conn);
+            .execute(conn)?;
+
+        Ok(Self::by_id(query_id, conn).ok_or("Unknown id")?)
+    }
+
+    pub fn generate_races(query_id: &i32, conn: &mut SqliteConnection) -> Result<Self, Box<dyn Error>> {
+        let faceoff = Self::by_id(&query_id, conn).ok_or("provided faceoff id does not exist")?;
+
+        let team_ids = utils::ids::string_to_ids(faceoff.team_ids.ok_or("no team has been set for faceoff")?)?;
+
+        // Check for teams validity
+        for team_id in team_ids.clone() {
+            let _ = Team::by_id(&team_id, conn).ok_or("Unknown team_id")?;
+        }
+
+        let mut race_ids: Vec<i32> = vec![];
+
+        for _race in 0..faceoff.race_number {
+            race_ids.push(
+                Race::create(team_ids.clone(), Some(faceoff.id), None, conn)
+                    .unwrap()
+                    .id,
+            );
+        }
+
+        Self::set_race_ids(query_id, &race_ids, conn)
     }
 }
 #[cfg(test)]
@@ -185,7 +196,7 @@ mod faceoff_test {
         let faceoff = Faceoff::create(6, team_ids, &mut conn).unwrap();
 
         println!("{:?}", teams);
-        for race_id in utils::ids::string_to_ids(faceoff.race_ids).unwrap() {
+        for race_id in utils::ids::string_to_ids(faceoff.race_ids.unwrap()).unwrap() {
             println!("{:?}", Race::by_id(&race_id, &conn).unwrap());
         }
     }

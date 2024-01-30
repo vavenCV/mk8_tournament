@@ -18,6 +18,8 @@ curl -s -X GET -H "Content-Type: application/json" http://localhost:5000/teams |
 
 ```
 curl -i -X POST -H "Content-Type: application/json" -d '{"race_number":6, "team_ids": [-259569, 580317584, 2117927201]}' http://localhost:5000/faceoffs
+curl -i -X POST -H "Content-Type: application/json" -d '{"race_number":6, "team_ids": []}' http://localhost:5000/faceoffs
+
 ```
 
 This will create all races with empty points, to be created later

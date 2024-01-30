@@ -377,7 +377,7 @@ components:
       properties:
         race_number:
           type: integer
-          format: u8
+          format: uint8
           example: 6
         team_ids:
           type: array
@@ -393,6 +393,10 @@ components:
           type: integer
           format: int32
           example: -2536847
+        race_number:
+          type: integer
+          format: uint8
+          example: 6
         race_ids:
           type: array
           items:
