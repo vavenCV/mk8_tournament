@@ -3,9 +3,10 @@ use std::collections::HashMap;
 use crate::db::schema::races::dsl::races as race_dsl;
 use crate::{db::schema::races, utils};
 use diesel::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::ser::SerializeStruct;
+use serde::{Deserialize, Serialize, Serializer};
 use uuid::Uuid;
-#[derive(Debug, Deserialize, Serialize, Queryable, Insertable)]
+#[derive(Debug, Deserialize, Queryable, Insertable)]
 #[table_name = "races"]
 
 pub struct Race {
@@ -14,7 +15,20 @@ pub struct Race {
     pub faceoff_id: Option<i32>,
     pub race_point_ids: Option<String>,
 }
-
+impl Serialize for Race {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        // 3 is the number of fields in the struct.
+        let mut state = serializer.serialize_struct("Race", 3)?;
+        state.serialize_field("id", &self.id)?;
+        state.serialize_field("team_ids", &utils::ids::string_to_ids(self.team_ids.clone().unwrap()).unwrap())?;
+        state.serialize_field("faceoff_id", &self.faceoff_id)?;
+        state.serialize_field("race_point_ids", &utils::ids::string_to_ids(self.race_point_ids.clone().unwrap()).unwrap())?;
+        state.end()
+    }
+}
 impl Race {
     pub fn list(conn: &mut SqliteConnection) -> Vec<Self> {
         race_dsl.load::<Race>(conn).expect("Error loading races")
@@ -163,16 +177,16 @@ mod player_test {
     fn create_race() {
         let mut conn = establish_connection().get().unwrap();
 
-        let player_name = "[GRE] p1";
         let points = 15;
-
-        let player = Player::create(player_name, None, &mut conn).unwrap();
 
         let team = Team::create(["P1", "P2", "P3", "P4"], &mut conn).unwrap();
 
         let mut race = Race::create(vec![team.id], None, None, &mut conn).unwrap();
 
-        let race_points = RacePoints::create(player.id, race.id, points, &mut conn).unwrap();
+        let player_ids = utils::ids::string_to_ids(team.player_ids).unwrap();
+        let player_id = player_ids.first().unwrap();
+
+        let race_points = RacePoints::create(*player_id, race.id, points, &mut conn).unwrap();
 
         Race::set_racepoint_ids(race.id, &[race_points.id], &mut conn);
         race = Race::by_id(&race.id, &conn).unwrap();

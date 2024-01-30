@@ -7,7 +7,7 @@ use uuid::Uuid;
 #[table_name = "players"]
 pub struct Player {
     pub id: i32,
-    pub team_id: Option<i32>,
+    pub team_id: i32,
     pub name: String,
 }
 impl Player {
@@ -47,7 +47,7 @@ impl Player {
         }
     }
 
-    pub fn create(name: &str, team_id: Option<i32>, conn: &mut SqliteConnection) -> Option<Self> {
+    pub fn create(name: &str, team_id: i32, conn: &mut SqliteConnection) -> Option<Self> {
         let new_id = Uuid::new_v4().as_u128() as i32;
 
         if let Some(player) = Self::by_name(&name, conn) {
@@ -62,7 +62,7 @@ impl Player {
         Self::by_id(&new_id, conn)
     }
 
-    fn new_player_struct(id: &i32, team_id: Option<i32>, name: &str) -> Self {
+    fn new_player_struct(id: &i32, team_id: i32, name: &str) -> Self {
         Player {
             id: *id,
             team_id: team_id,
@@ -77,22 +77,22 @@ mod player_test {
     fn create_player_with_name() {
         let mut conn = establish_connection().get().unwrap();
         let name = "[GRE] p1";
-        let player = Player::create(name, None, &mut conn).unwrap();
+        let player = Player::create(name, 1, &mut conn).unwrap();
         assert_eq!(player.name.as_str(), name);
     }
     #[test]
     fn create_player_with_existing_name() {
         let mut conn = establish_connection().get().unwrap();
         let name = "[GRE] p1";
-        let player = Player::create(name, None, &mut conn).unwrap();
-        let existing_player = Player::create(name, None, &mut conn).unwrap();
+        let player = Player::create(name, 1, &mut conn).unwrap();
+        let existing_player = Player::create(name, 1, &mut conn).unwrap();
         assert_eq!(player.id, existing_player.id);
     }
     #[test]
     fn list_players() {
         let mut conn = establish_connection().get().unwrap();
         let name = "[GRE] p1";
-        let player = Player::create(name, None, &mut conn).unwrap();
+        let player = Player::create(name, 1, &mut conn).unwrap();
         let existing_players = Player::list(&mut conn);
         assert_eq!(1, existing_players.len());
         assert_eq!(player.id, existing_players[0].id);
@@ -101,7 +101,7 @@ mod player_test {
     fn get_player_by_name() {
         let mut conn = establish_connection().get().unwrap();
         let name = "[GRE] p1";
-        let player = Player::create(name, None, &mut conn).unwrap();
+        let player = Player::create(name, 1, &mut conn).unwrap();
         let existing_player = Player::by_name(&name, &conn).unwrap();
         assert_eq!(player.id, existing_player.id);
     }
@@ -109,7 +109,7 @@ mod player_test {
     fn get_player_by_id() {
         let mut conn = establish_connection().get().unwrap();
         let name = "[GRE] p1";
-        let player = Player::create(name, None, &mut conn).unwrap();
+        let player = Player::create(name, 1, &mut conn).unwrap();
         let existing_player = Player::by_id(&player.id, &conn).unwrap();
         assert_eq!(player.id, existing_player.id);
     }

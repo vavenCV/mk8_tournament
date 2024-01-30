@@ -4,11 +4,12 @@ use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 pub struct PlayerForm {
+    team_id: i32,
     name: String,
 }
 pub fn create(player_form: web::Json<PlayerForm>, pool: web::Data<DbPool>) -> HttpResponse {
     let mut conn = pool.get().unwrap();
-    match Player::create(&player_form.name.clone(), None, &mut conn) {
+    match Player::create(&player_form.name.clone(), player_form.team_id, &mut conn) {
         Some(user) => HttpResponse::Ok().json(user),
         _ => HttpResponse::InternalServerError().json("Could not create user"),
     }

@@ -136,7 +136,7 @@ mod player_test {
 
         let team = Team::create(["P1", "P2", "P3", "P4"], &mut conn).unwrap();
 
-        let player = Player::create(player_name, None, &mut conn).unwrap();
+        let player = Player::create(player_name, team.id, &mut conn).unwrap();
         let race = Race::create(vec![team.id], None, None, &mut conn).unwrap();
 
         let race_points = RacePoints::create(player.id, race.id, player_points, &mut conn).unwrap();

@@ -9,42 +9,54 @@ servers:
 paths:
   /players:
     get:
+      tags:
+        - players
       summary: Returns all players.
       responses:
-        "200": # status code
-          description: A JSON array of players
+        "200":
+          description: successful operation
           content:
             application/json:
-              example:
-                [
-                  {
-                    "id": -1026797181,
-                    "team_id": 790284319,
-                    "name": "[SOF] p1",
-                  },
-                  {
-                    "id": -326015235,
-                    "team_id": 1650047014,
-                    "name": "[GRE] p4",
-                  },
-                ]
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Players'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Players'
     post:
+      tags:
+        - players
       summary: creates a player.
-      parameters:
-        - name: name
-          in: body
-          required: true
-          description: Name of the player
-          schema:
-            type: string
-            format: utf8
-            example: { "name": "[GRE] p1" }
+      requestBody:
+        description: Created player object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlayersRequestBody'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/PlayersRequestBody'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlayersRequestBody'
       responses:
-        "200": # status code
-          description: A JSON of the created player
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Players'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Players'
 
   /players/{Id}:
     get:
+      tags:
+        - players
       summary: Returns a user by ID.
       parameters:
         - name: Id
@@ -55,100 +67,106 @@ paths:
             type: integer
             format: int32
       responses:
-        "200": # status code
-          description: A JSON of player matching the id
+        "200":
+          description: successful operation
           content:
             application/json:
-              example:
-                { "id": -326015235, "team_id": 1650047014, "name": "[GRE] p4" }
+              schema:
+                $ref: '#/components/schemas/Players'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Players'
   /teams:
     get:
+      tags:
+        - teams
       summary: Returns all teams.
       responses:
         "200": # status code
           description: A JSON of player matching the id
           content:
             application/json:
-              example:
-                [
-                  {
-                    "id": 790284319,
-                    "player_ids": "-959482049;-112902154;-1026797181;1237765841",
-                  },
-                  {
-                    "id": 1439906126,
-                    "player_ids": "-469872453;-326015235;1431639362;1555480604",
-                  },
-                ]
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamResponse'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamResponse'
     post:
+      tags:
+        - teams
       summary: creates a team.
-      parameters:
-        - name: player_names
-          in: body
-          required: true
-          description: Names of the players
-          schema:
-            type: array
-            items:
-              type: string
-              format: utf8
-              example:
-                {
-                  "player_names":
-                    ["[GRE] p1", "[GRE] p2", "[GRE] p3", "[GRE] p4"],
-                }
+      requestBody:
+        description: Created team object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamRequestBody'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/TeamRequestBody'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TeamRequestBody'
       responses:
-        "200": # status code
-          description: A JSON of the created team
+        "200":
+          description: successful operation
           content:
             application/json:
-              example:
-                {
-                  "id": 790284319,
-                  "player_ids": "-959482049;-112902154;-1026797181;1237765841",
-                }
+              schema:
+                $ref: '#/components/schemas/TeamResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/TeamResponse'
   /teams/{Id}:
     get:
+      tags:
+        - teams
       summary: Returns a team by ID.
       parameters:
         - name: Id
           in: path
           required: true
-          description: Parameter description in CommonMark or HTML.
+          description: The Id of the item
           schema:
             type: integer
             format: int32
       responses:
         "200": # status code
-          description: A JSON of team matching the id
+          description: successful operation
           content:
             application/json:
-              example:
-                {
-                  "id": 790284319,
-                  "player_ids": "-959482049;-112902154;-1026797181;1237765841",
-                }
+              schema:
+                $ref: '#/components/schemas/TeamResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/TeamResponse'
   /races:
     get:
+      tags:
+        - races
       summary: Returns all teams.
       responses:
-        "200": # status code
-          description: A JSON of player matching the id
+        "200":
+          description: successful operation
           content:
             application/json:
-              example:
-                [
-                  {
-                    "id": 790284319,
-                    "player_ids": "-959482049;-112902154;-1026797181;1237765841",
-                  },
-                  {
-                    "id": 1439906126,
-                    "player_ids": "-469872453;-326015235;1431639362;1555480604",
-                  },
-                ]
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RaceResponse'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RaceResponse'
   /races/{Id}:
     get:
+      tags:
+        - races
       summary: Returns a race by ID.
       parameters:
         - name: Id
@@ -160,25 +178,17 @@ paths:
             format: int32
       responses:
         "200": # status code
-          description: A JSON of race matching the id
+          description: successful operation
           content:
             application/json:
-              example:
-                [
-                  {
-                    "id": -1798837048,
-                    "team_ids": "790284319;1439906126;1650047014",
-                    "faceoff_id": 1518722312,
-                    "race_point_ids": "",
-                  },
-                  {
-                    "id": -1607695505,
-                    "team_ids": "790284319;1439906126;1650047014",
-                    "faceoff_id": 1518722312,
-                    "race_point_ids": "",
-                  },
-                ]
+              schema:
+                $ref: '#/components/schemas/RaceResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/RaceResponse'
     put:
+      tags:
+        - races
       summary: add points for players in race that matches Id.
       parameters:
         - name: Id
@@ -188,38 +198,211 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: race_points
-          in: body
-          required: true
-          description: points of players in race
-          schema:
-            type: array
-            items:
-              type: object
-              properties:
-                player_id:
-                  type: string
-                points:
-                  type: integer
-            example:
-              {
-                "player_names":
-                  [
-                    { "player_id": 1431639362, points: 15 },
-                    { "player_id": 1555480604, points: 12 },
-                  ],
-              }
+      requestBody:
+        description: Created team object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RacePutPoints'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/RacePutPoints'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RacePutPoints'
       responses:
         "200": # status code
-          description: A JSON of race matching the id
+          description: successful operation
           content:
             application/json:
-              example:
-                [
-                  {
-                    "id": -1798837048,
-                    "team_ids": "790284319;1439906126;1650047014",
-                    "faceoff_id": 1518722312,
-                    "race_point_ids": "469872453;-326015235",
-                  },
-                ]
+              schema:
+                $ref: '#/components/schemas/RaceResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/RaceResponse'
+  /faceoffs:
+    get:
+      tags:
+        - faceoffs
+      summary: Returns all faceoffs.
+      responses:
+        "200": # status code
+          description: A JSON of faceoff matching the id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FaceoffResponse'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FaceoffResponse'
+    post:
+      tags:
+        - faceoffs
+      summary: creates a faceoff.
+      requestBody:
+        description: Created faceoff object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FaceoffRequestBody'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/FaceoffRequestBody'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FaceoffRequestBody'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FaceoffResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/FaceoffResponse'
+  /faceoffs/{Id}:
+    get:
+      tags:
+        - faceoffs
+      summary: Returns a faceoff by ID.
+      parameters:
+        - name: Id
+          in: path
+          required: true
+          description: The Id of the item
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200": # status code
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FaceoffResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/FaceoffResponse'
+components:
+  schemas:
+    PlayersRequestBody:
+      type: object
+      properties:
+        team_id:
+          type: integer
+          format: int32
+          example: 1559874
+        name:
+          type: string
+          example: "[GRE] p1"
+    Players:
+      allOf:
+        - $ref: '#/components/schemas/PlayersRequestBody'
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int32
+              example: -2536847
+    TeamRequestBody:
+      type: object
+      properties:
+        player_names:
+          type: array
+          items: 
+            type: string
+          example: ["[GRE] p1", "[GRE] p2", "[GRE] p3", "[GRE] p4"]
+    TeamResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: -2536847
+        player_ids:
+          type: array
+          items:
+            type: integer
+            format: int32
+          example: [-8951576,5894477,2525689,-7745123]
+    RacePointsCreation:
+      type: object
+      properties:
+        player_id:
+          type: integer
+          format: int32
+          example: -2536847
+        points:
+          type: integer
+          format: u8
+          example: 15
+    RacePutPoints:
+      type: object
+      properties:
+        race_points:
+          type: array
+          items: 
+            $ref: '#/components/schemas/RacePointsCreation'
+          # example: "race_points": [{"player_id": 1555480604, "points": 15}, {"player_id": 1431639362, "points": 12}, {"player_id": 1237765841, "points": 10}, {"player_id": -112902154, "points": 8}, {"player_id": -201583806, "points": 7}, {"player_id": -225324610, "points": 5}, {"player_id": -326015235, "points": 5}, {"player_id": -364038806, "points": 4}, {"player_id": -469872453, "points": 3}, {"player_id": -880137878, "points": 2}, {"player_id": -959482049, "points": 1}, {"player_id": -1026797181, "points": 0}]
+    RaceResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: -2536847
+        team_ids:
+          type: array
+          items:
+            type: integer
+            format: int32
+          example: [-8951576,5894477,2525689,-7745123]
+        faceoff_id:
+          type: integer
+          format: int32
+          example: -2536847
+        race_point_ids:
+          type: array
+          items:
+            type: integer
+            format: int32
+          example: [-8951576,5894477,2525689,-7745123]
+    FaceoffRequestBody:
+      type: object
+      properties:
+        race_number:
+          type: integer
+          format: u8
+          example: 6
+        team_ids:
+          type: array
+          items: 
+            type: integer
+            format: int32
+            example: -2536847
+          example: [-8951576,5894477,2525689]
+    FaceoffResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: -2536847
+        race_ids:
+          type: array
+          items:
+            type: integer
+            format: int32
+          example: [-47475223,-7745123,2525689,5894477]
+        team_ids:
+          type: array
+          items: 
+            type: integer
+            format: int32
+            example: -2536847
+          example: [-8951576,5894477,2525689]

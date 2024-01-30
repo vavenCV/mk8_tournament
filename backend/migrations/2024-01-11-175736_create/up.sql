@@ -3,7 +3,7 @@
 
 CREATE TABLE players (
   	id INTEGER PRIMARY KEY NOT NULL,
-	team_id INTEGER,
+	team_id INTEGER NOT NULL,
 	name TEXT NOT NULL
 );
 

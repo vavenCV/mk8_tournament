@@ -44,7 +44,6 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
         web::resource("/faceoffs")
             .route(web::post().to(create))
             .route(web::get().to(index))
-            .route(web::put().to(index)),
     )
     .service(web::scope("/faceoffs").route("/{id}", web::get().to(get)));
 }

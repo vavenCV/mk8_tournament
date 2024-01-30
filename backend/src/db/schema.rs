@@ -11,7 +11,7 @@ diesel::table! {
 diesel::table! {
     players (id) {
         id -> Integer,
-        team_id -> Nullable<Integer>,
+        team_id -> Integer,
         name -> Text,
     }
 }

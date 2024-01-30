@@ -1,14 +1,27 @@
 use super::player::Player;
-use crate::db::schema::teams;
+use crate::{db::schema::teams, utils};
 use crate::db::schema::teams::dsl::teams as team_dsl;
 use diesel::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::ser::SerializeStruct;
+use serde::{Deserialize, Serialize, Serializer};
 use uuid::Uuid;
-#[derive(Debug, Deserialize, Serialize, Queryable, Insertable)]
+#[derive(Debug, Deserialize, Queryable, Insertable)]
 #[table_name = "teams"]
 pub struct Team {
     pub id: i32,
     pub player_ids: String,
+}
+impl Serialize for Team {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        // 3 is the number of fields in the struct.
+        let mut state = serializer.serialize_struct("Team", 3)?;
+        state.serialize_field("id", &self.id)?;
+        state.serialize_field("player_ids", &utils::ids::string_to_ids(self.player_ids.clone()).unwrap())?;
+        state.end()
+    }
 }
 impl Team {
     pub fn list(conn: &mut SqliteConnection) -> Vec<Self> {
@@ -38,7 +51,7 @@ impl Team {
         for name in player_names {
             let players: Vec<Player> = player_names
                 .iter()
-                .map(|name| Player::create(name, Some(new_id), conn).unwrap())
+                .map(|name| Player::create(name, new_id, conn).unwrap())
                 .collect();
 
             player_ids_vec.push(match Player::by_name(name, conn) {

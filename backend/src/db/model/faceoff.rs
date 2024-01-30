@@ -3,12 +3,13 @@ use std::collections::HashMap;
 use crate::db::schema::faceoffs::dsl::faceoffs as faceoff_dsl;
 use crate::{db::schema::faceoffs, utils};
 use diesel::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::ser::SerializeStruct;
+use serde::{Deserialize, Serialize, Serializer};
 use uuid::Uuid;
 
 use super::race::Race;
 use super::team::Team;
-#[derive(Debug, Deserialize, Serialize, Queryable, Insertable)]
+#[derive(Debug, Deserialize, Queryable, Insertable)]
 #[table_name = "faceoffs"]
 
 pub struct Faceoff {
@@ -16,7 +17,19 @@ pub struct Faceoff {
     pub race_ids: String,
     pub team_ids: String,
 }
-
+impl Serialize for Faceoff {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        // 3 is the number of fields in the struct.
+        let mut state = serializer.serialize_struct("Faceoff", 3)?;
+        state.serialize_field("id", &self.id)?;
+        state.serialize_field("race_ids", &utils::ids::string_to_ids(self.race_ids.clone()).unwrap())?;
+        state.serialize_field("team_ids", &utils::ids::string_to_ids(self.team_ids.clone()).unwrap())?;
+        state.end()
+    }
+}
 impl Faceoff {
     pub fn list(conn: &mut SqliteConnection) -> Vec<Self> {
         faceoff_dsl
