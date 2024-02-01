@@ -1,124 +1,179 @@
 import {
-  AppBar,
-  Avatar,
   Box,
-  Button,
   Container,
-  Icon,
   List,
   ListItem,
   Paper,
   Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Tabs,
-  TextField,
 } from "@mui/material";
 import "./App.css";
-import mk8LogoUrl from "./assets/mk8-logo.png";
+import MKTourAppBar from "./components/AppBar";
 import React, { useEffect, useState } from "react";
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
+import api from "./api";
+import theme from "./theme.ts";
 
-function AddTeam() {
-  return (
-    <Paper style={{ padding: "1px" }}>
-      <Box color="secondary">
-        <h4>Add team</h4>
-      </Box>
-      <TextField id="outlined-basic" label="Team ID" variant="outlined" />
-      <Box m={1}>
-        <Button color="primary">Submit</Button>
-      </Box>
-      {/* </Box> */}
-    </Paper>
-  );
-}
+// function AddTeam() {
+//   return (
+//     <Paper style={{ padding: "1px" }}>
+//       <Box color="secondary">
+//         <h4>Add team</h4>
+//       </Box>
+//       <TextField id="outlined-basic" label="Team ID" variant="outlined" />
+//       <Box m={1}>
+//         <Button color="primary">Submit</Button>
+//       </Box>
+//       {/* </Box> */}
+//     </Paper>
+//   );
+// }
 
-function AppBarImage(props: { src: string }) {
-  return (
-    <Box
-      component={"img"}
-      src={props.src}
-      width={"40px"}
-      height={"40px"}
-      m={2}
-      marginY="auto"
-    ></Box>
-  );
-}
-
-function MKTourAppBar() {
-  return (
-    <AppBar position="absolute" sx={{ textShadow: 1 }}>
-      <div style={{ display: "flex", margin: "auto", gap: 20 }}>
-        <AppBarImage src={mk8LogoUrl} />
-        <Box m={0}>
-          <h2
-            style={{
-              textShadow: "1px 1px 0px #444",
-              fontFamily: "mariokart",
-              fontSize: "18pt",
-              outlineWidth: "4px",
-              outlineColor: "#000",
-            }}
-          >
-            MARIO KART TOURNAMENT
-          </h2>
-        </Box>
-      </div>
-    </AppBar>
-  );
+interface Team {
+  id: number;
+  player_ids: number[];
 }
 
 function TeamList() {
-  const [teams, setTeams] = useState([]);
+  const [teams, setTeams] = useState<Team[]>([]);
 
   useEffect(() => {
-    axios.get("127.0.0.1:5000/players").then((res: AxiosResponse) => {
+    api
+      .get("/teams")
+      .then((res: AxiosResponse) => {
+        // console.debug(res);
         setTeams(res.data);
-    }).catch((err) => {
-        console.log(err);
-    })
-  })
+      })
+      .catch((err) => {
+        // console.debug(err);
+      });
+  }, []);
 
   return (
     <Paper>
       <List>
-        <ListItem>GRE</ListItem>
-        <ListItem>LYS</ListItem>
-        <ListItem>CAC</ListItem>
+        {teams.map((team) => {
+          return <ListItem key={team.id}>{team.id}</ListItem>;
+        })}
       </List>
     </Paper>
   );
 }
 
-function PlayerList() {
-  const [players, setPlayers] = useState([]);
+interface Player {
+  team_id: number;
+  name: string;
+  id: number;
+}
 
+function PlayerList({ players, teams }: { players: Player[]; teams: Team[] }) {
   return (
-    <Paper>
-      <List>
-        <ListItem>qwe</ListItem>
-      </List>
-    </Paper>
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow sx={{ bgcolor: theme.palette.primary.main }}>
+            <TableCell sx={{ color: theme.palette.common.white }}>
+              Name
+            </TableCell>
+            <TableCell align="right" sx={{ color: theme.palette.common.white }}>
+              Team
+            </TableCell>
+            <TableCell align="right" sx={{ color: theme.palette.common.white }}>
+              Total score
+            </TableCell>
+            <TableCell align="right" sx={{ color: theme.palette.common.white }}>
+              Ranking
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {players.map((player) => (
+            <TableRow
+              key={player.id}
+              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+            >
+              <TableCell>{player.name}</TableCell>
+              {/* TODO replace team id by team name */}
+              <TableCell align="right">
+                {teams.filter((t) => t.id == player.team_id)[0].id}
+              </TableCell>
+              <TableCell align="right">
+                {/* TODO replace id by score */}
+                {/* {player.score} */} {player.id}
+              </TableCell>
+              <TableCell align="right">
+                {/* TODO replace id by score */}
+                {players.sort((a, b) => a.id - b.id).indexOf(player) + 1}
+              </TableCell>
+            </TableRow>
+          ))}
+          <TableRow></TableRow>
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
 
 function MKTourTabs() {
+  // Current tab index
   const [current, setCurrent] = useState(0);
+  // List of players fetched from DB
+  const [players, setPlayers] = useState<Player[]>([]);
+  // List of teams fetched from DB
+  const [teams, setTeams] = useState<Team[]>([]);
 
   const handleChange = (_: React.SyntheticEvent, newValue: number) => {
     setCurrent(newValue);
   };
 
+  useEffect(() => {
+    api
+      .get("/players")
+      .then((res: AxiosResponse) => {
+        // console.log(res);
+        setPlayers(res.data);
+      })
+      .catch((err) => {
+        // console.log(err);
+      });
+  }, []);
+
+  useEffect(() => {
+    api
+      .get("/teams")
+      .then((res: AxiosResponse) => {
+        // console.log(res);
+        setTeams(res.data);
+      })
+      .catch((err) => {
+        // console.log(err);
+      });
+  }, []);
+
   return (
-    <Container>
-      <Tabs value={current} onChange={handleChange} centered>
-        <Tab label="Teams" />
-        <Tab label="Players" />
-        <Tab label="Leaderboard" />
-      </Tabs>
-      {current == 0 && <TeamList />}
-      {current == 1 && <PlayerList />}
-      {current == 2 && <Paper>TODO</Paper>}
+    <Container sx={{ marginTop: "1em" }}>
+      <Box width="90%" style={{ margin: "auto" }}>
+        <Tabs
+          value={current}
+          onChange={handleChange}
+          centered
+          sx={{ marginBottom: "1em" }}
+          variant="fullWidth"
+        >
+          <Tab label="Bracket" />
+          <Tab label="Teams" />
+          <Tab label="Players" />
+        </Tabs>
+        {current == 0 && <Paper>TODO BRACKET</Paper>}
+        {current == 1 && <TeamList />}
+        {current == 2 && <PlayerList players={players} teams={teams} />}
+      </Box>
     </Container>
   );
 }
@@ -128,7 +183,6 @@ function App() {
     <div>
       <MKTourAppBar />
       <MKTourTabs />
-      <AddTeam />
     </div>
   );
 }
