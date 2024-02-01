@@ -1,10 +1,7 @@
-use std::collections::HashMap;
-
 use crate::{db::schema::race_points, utils};
 use crate::db::schema::race_points::dsl::race_points as race_points_dsl;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 #[derive(Debug, Deserialize, Serialize, Queryable, Insertable)]
 #[table_name = "race_points"]
 

@@ -4,8 +4,8 @@ use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 pub struct PlayerForm {
-    team_id: i32,
-    name: String,
+    pub team_id: i32,
+    pub name: String,
 }
 pub fn create(player_form: web::Json<PlayerForm>, pool: web::Data<DbPool>) -> HttpResponse {
     let mut conn = pool.get().unwrap();

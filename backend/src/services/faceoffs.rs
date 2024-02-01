@@ -1,18 +1,18 @@
 // src/services/user.rs
 use crate::db::{
-    model::{faceoff::Faceoff, player::Player},
+    model::{faceoff::Faceoff},
     DbPool,
 };
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 pub struct FaceoffForm {
-    race_number: i32,
-    team_ids: Vec<i32>,
+    pub race_number: i32,
+    pub team_ids: Vec<i32>,
 }
 #[derive(Serialize, Deserialize)]
 pub struct FaceoffTeamUpdate {
-    team_ids: Vec<i32>,
+    pub team_ids: Vec<i32>,
 }
 pub fn create(faceoff_form: web::Json<FaceoffForm>, pool: web::Data<DbPool>) -> HttpResponse {
     let mut conn = pool.get().unwrap();

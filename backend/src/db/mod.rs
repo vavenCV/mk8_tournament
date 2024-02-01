@@ -1,8 +1,6 @@
 pub mod model;
 pub mod schema;
 
-use std::env;
-
 use diesel::sqlite::SqliteConnection;
 use r2d2::Pool;
 use r2d2_diesel::ConnectionManager;

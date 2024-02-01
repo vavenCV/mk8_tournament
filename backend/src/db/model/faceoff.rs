@@ -8,6 +8,15 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use super::race::Race;
 use super::team::Team;
+
+#[derive(Debug, Deserialize, Serialize)]
+
+pub struct FaceoffResp {
+    pub id: i32,
+    pub race_number: i32,
+    pub race_ids: Vec<i32>,
+    pub team_ids: Vec<i32>,
+}
 #[derive(Debug, Deserialize, Queryable, Insertable)]
 #[table_name = "faceoffs"]
 
@@ -23,8 +32,9 @@ impl Serialize for Faceoff {
         S: Serializer,
     {
         // 3 is the number of fields in the struct.
-        let mut state = serializer.serialize_struct("Faceoff", 3)?;
+        let mut state = serializer.serialize_struct("Faceoff", 4)?;
         state.serialize_field("id", &self.id)?;
+        state.serialize_field("race_number", &self.race_number)?;
         state.serialize_field("race_ids", &utils::ids::string_to_ids(self.race_ids.clone().unwrap()).unwrap())?;
         state.serialize_field("team_ids", &utils::ids::string_to_ids(self.team_ids.clone().unwrap()).unwrap())?;
         state.end()

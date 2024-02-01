@@ -6,7 +6,14 @@ use crate::{db::schema::teams, utils};
 use diesel::prelude::*;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
-use uuid::Uuid;
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TeamResp {
+    pub id: i32,
+    pub name: String,
+    pub player_ids: Vec<i32>,
+}
+
 #[derive(Debug, Deserialize, Queryable, Insertable)]
 #[table_name = "teams"]
 pub struct Team {

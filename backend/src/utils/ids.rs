@@ -2,9 +2,8 @@ use diesel::SqliteConnection;
 use uuid::Uuid;
 
 pub fn get_random_unique_id<T>(by_id: fn(&i32, &SqliteConnection) -> Option<T>, conn: &SqliteConnection ) -> i32 {
-    let mut new_id: i32 = 0;
     loop  {
-        new_id = Uuid::new_v4().as_u128() as i32;
+        let new_id = Uuid::new_v4().as_u128() as i32;
 
         if by_id(&new_id, conn).is_none() {
             return new_id;

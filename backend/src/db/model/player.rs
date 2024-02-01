@@ -2,7 +2,6 @@ use crate::{db::schema::players, utils};
 use crate::db::schema::players::dsl::players as player_dsl;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 #[derive(Debug, Deserialize, Serialize, Queryable, Insertable)]
 #[table_name = "players"]
 pub struct Player {

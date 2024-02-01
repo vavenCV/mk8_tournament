@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::error::Error;
 
 use crate::db::schema::races::dsl::races as race_dsl;
@@ -6,10 +5,18 @@ use crate::{db::schema::races, utils};
 use diesel::prelude::*;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
-use uuid::Uuid;
 
 use super::race_point::RacePoints;
 use super::team::Team;
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct RaceResp {
+    pub id: i32,
+    pub team_ids: Vec<i32>,
+    pub faceoff_id: Option<i32>,
+    pub race_point_ids: Vec<i32>,
+}
+
 #[derive(Debug, Deserialize, Queryable, Insertable)]
 #[table_name = "races"]
 
@@ -157,7 +164,7 @@ impl Race {
         use crate::db::schema::races::dsl::faceoff_id;
         use crate::db::schema::races::dsl::id;
 
-        let updated_row = diesel::update(race_dsl.filter(id.eq(query_id)))
+        let _updated_row = diesel::update(race_dsl.filter(id.eq(query_id)))
             .set(faceoff_id.eq(new_faceoff_id))
             .execute(conn);
     }
@@ -168,8 +175,7 @@ impl Race {
 
         let str_racepoint_ids = utils::ids::ids_to_string(Some(racepoint_ids.to_vec()));
 
-        println!("{:?}", str_racepoint_ids);
-        let updated_row = diesel::update(race_dsl.filter(id.eq(query_id)))
+        let _updated_row = diesel::update(race_dsl.filter(id.eq(query_id)))
             .set(race_point_ids.eq(str_racepoint_ids))
             .execute(conn);
     }
@@ -186,9 +192,10 @@ impl Race {
             .map(|rp_id| -> Result<i32, Box<dyn Error>> {
                 Ok(RacePoints::by_id(rp_id, conn)
                     .ok_or("unknown race_point id")?
-                    .id)
+                    .player_id)
             })
             .collect::<Result<Vec<i32>, Box<dyn Error>>>()?;
+
         for team_id in utils::ids::string_to_ids(race.team_ids.ok_or("no team in race")?)? {
             let team = Team::by_id(&team_id, conn).ok_or("unknown team_id")?;
             for player_id in utils::ids::string_to_ids(team.player_ids)? {

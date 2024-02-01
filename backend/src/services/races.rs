@@ -8,19 +8,19 @@ use crate::db::{
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct RaceStatus {
-    id: i32,
-    is_ended: bool,
+    pub id: i32,
+    pub is_ended: bool,
 }
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RacePointForm {
-    player_id: i32,
-    points: u8,
+    pub player_id: i32,
+    pub points: u8,
 }
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Default, Debug, Clone)]
 pub struct RaceForm {
-    race_points: Vec<RacePointForm>,
+    pub race_points: Vec<RacePointForm>,
 }
 pub fn index(pool: web::Data<DbPool>) -> HttpResponse {
     let mut conn = pool.get().unwrap();
