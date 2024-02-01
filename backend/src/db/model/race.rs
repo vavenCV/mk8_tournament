@@ -25,7 +25,7 @@ impl Serialize for Race {
         S: Serializer,
     {
         // 3 is the number of fields in the struct.
-        let mut state = serializer.serialize_struct("Race", 3)?;
+        let mut state = serializer.serialize_struct("Race", 4)?;
         state.serialize_field("id", &self.id)?;
         state.serialize_field(
             "team_ids",
@@ -119,7 +119,7 @@ impl Race {
         race_point_ids: Option<Vec<i32>>,
         conn: &mut SqliteConnection,
     ) -> Option<Self> {
-        let new_id = Uuid::new_v4().as_u128() as i32;
+        let new_id = utils::ids::get_random_unique_id(Self::by_id, conn);
 
         if faceoff_id.is_some() && race_point_ids.is_some() {
             if let Some(player) = Self::by_faceoff_and_racepoint_ids(
@@ -192,7 +192,6 @@ impl Race {
         for team_id in utils::ids::string_to_ids(race.team_ids.ok_or("no team in race")?)? {
             let team = Team::by_id(&team_id, conn).ok_or("unknown team_id")?;
             for player_id in utils::ids::string_to_ids(team.player_ids)? {
-                // race_point_ids.con
                 if !player_ids_with_points.contains(&player_id) {
                     return Ok(false);
                 }
@@ -217,7 +216,7 @@ mod player_test {
 
         let points = 15;
 
-        let team = Team::create(["P1", "P2", "P3", "P4"], &mut conn).unwrap();
+        let team = Team::create("[GRE 1]".to_string(), ["P1", "P2", "P3", "P4"], &mut conn).unwrap();
 
         let mut race = Race::create(vec![team.id], None, None, &mut conn).unwrap();
 

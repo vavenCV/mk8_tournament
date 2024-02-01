@@ -9,6 +9,11 @@ use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
+pub struct RaceStatus {
+    id: i32,
+    is_ended: bool,
+}
+#[derive(Serialize, Deserialize)]
 pub struct RacePointForm {
     player_id: i32,
     points: u8,
@@ -24,7 +29,16 @@ pub fn index(pool: web::Data<DbPool>) -> HttpResponse {
 pub fn get(id: web::Path<i32>, pool: web::Data<DbPool>) -> HttpResponse {
     let conn = pool.get().unwrap();
     match Race::by_id(&id, &conn) {
-        Some(user) => HttpResponse::Ok().json(user),
+        Some(race) => HttpResponse::Ok().json(race),
+        _ => HttpResponse::NotFound().json("Not Found"),
+    }
+}
+pub fn status(id: web::Path<i32>, pool: web::Data<DbPool>) -> HttpResponse {
+    let mut conn = pool.get().unwrap();
+    match Race::are_all_points_entered(&id, &mut conn) {
+        Ok(is_ended) => {
+            HttpResponse::Ok().json(RaceStatus{ id: *id, is_ended: is_ended })
+        },
         _ => HttpResponse::NotFound().json("Not Found"),
     }
 }
@@ -63,6 +77,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
         .service(
             web::scope("/races")
                 .route("/{id}", web::put().to(update))
-                .route("/{id}", web::get().to(get)),
+                .route("/{id}", web::get().to(get))
+                .route("/{id}/status", web::get().to(status)),
         );
 }

@@ -312,6 +312,9 @@ components:
     TeamRequestBody:
       type: object
       properties:
+        team_name: 
+          type: string
+          example: "[GRE 1]"
         player_names:
           type: array
           items: 
@@ -324,6 +327,9 @@ components:
           type: integer
           format: int32
           example: -2536847
+        name: 
+          type: string
+          example: "[GRE 1]"
         player_ids:
           type: array
           items:

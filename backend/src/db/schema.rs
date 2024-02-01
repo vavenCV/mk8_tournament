@@ -54,6 +54,7 @@ diesel::table! {
 diesel::table! {
     teams (id) {
         id -> Integer,
+        name -> Text,
         player_ids -> Text,
     }
 }

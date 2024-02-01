@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use super::player::Player;
 use crate::db::schema::teams::dsl::teams as team_dsl;
 use crate::{db::schema::teams, utils};
@@ -9,6 +11,7 @@ use uuid::Uuid;
 #[table_name = "teams"]
 pub struct Team {
     pub id: i32,
+    pub name: String,
     pub player_ids: String,
 }
 impl Serialize for Team {
@@ -19,6 +22,7 @@ impl Serialize for Team {
         // 3 is the number of fields in the struct.
         let mut state = serializer.serialize_struct("Team", 3)?;
         state.serialize_field("id", &self.id)?;
+        state.serialize_field("name", &self.name)?;
         state.serialize_field(
             "player_ids",
             &utils::ids::string_to_ids(self.player_ids.clone()).unwrap(),
@@ -28,7 +32,7 @@ impl Serialize for Team {
 }
 impl Team {
     pub fn list(conn: &mut SqliteConnection) -> Vec<Self> {
-        team_dsl.load::<Team>(conn).expect("Error loading users")
+        team_dsl.load::<Team>(conn).expect("Error loading teams")
     }
     pub fn by_id(id: &i32, conn: &SqliteConnection) -> Option<Self> {
         if let Ok(record) = team_dsl.find(id).get_result::<Team>(conn) {
@@ -37,6 +41,17 @@ impl Team {
             None
         }
     }
+
+    pub fn by_team_name(name_str: &str, conn: &SqliteConnection) -> Option<Self> {
+        use crate::db::schema::teams::dsl::name;
+
+        if let Ok(record) = team_dsl.filter(name.eq(name_str)).first::<Team>(conn) {
+            Some(record)
+        } else {
+            None
+        }
+    }
+
     pub fn by_player_ids(name_str: &str, conn: &SqliteConnection) -> Option<Self> {
         use crate::db::schema::teams::dsl::player_ids;
         if let Ok(record) = team_dsl.filter(player_ids.eq(name_str)).first::<Team>(conn) {
@@ -46,22 +61,22 @@ impl Team {
         }
     }
 
-    pub fn create(player_names: [&str; 4], conn: &mut SqliteConnection) -> Option<Self> {
-        let new_id = Uuid::new_v4().as_u128() as i32;
+    pub fn create(team_name: String, player_names: [&str; 4], conn: &mut SqliteConnection) -> Option<Self> {
+        let new_id = utils::ids::get_random_unique_id(Self::by_id, conn);
 
-        let mut player_ids_vec: Vec<String> = vec![];
-
-        for name in player_names {
-            let players: Vec<Player> = player_names
-                .iter()
-                .map(|name| Player::create(name, new_id, conn).unwrap())
-                .collect();
-
-            player_ids_vec.push(match Player::by_name(name, conn) {
-                Some(player) => player.id.to_string(),
-                None => return None,
-            });
+        if let Some(player) = Self::by_team_name(&team_name, conn) {
+            return Some(player);
         }
+
+        let player_ids_vec: Vec<String> = player_names
+            .iter()
+            .map(|name| -> Result<String, Box<dyn Error>> {
+                Ok(Player::create(name, new_id, conn)
+                    .ok_or("Could not create player")?
+                    .id
+                    .to_string())
+            })
+            .collect::<Result<Vec<String>, Box<dyn Error>>>().ok()?;
 
         let player_ids = player_ids_vec.join(";");
 
@@ -69,34 +84,25 @@ impl Team {
             return Some(player);
         }
 
-        let players: Vec<Player> = player_ids_vec
-            .iter()
-            .map(|id_str| Player::by_id(&id_str.parse::<i32>().unwrap(), conn).unwrap())
-            .collect();
-        let new_team = Self::new_team_struct(&new_id, players);
+        let new_team = Self::new_team_struct(&new_id, team_name, player_ids);
 
         diesel::insert_into(team_dsl)
             .values(&new_team)
             .execute(conn)
-            .expect("Error saving new player");
+            .expect("Error saving new team");
         Self::by_id(&new_id, conn)
     }
-    fn new_team_struct(id: &i32, players: Vec<Player>) -> Self {
-        let player_ids = players
-            .iter()
-            .map(|player| player.id.to_string())
-            .collect::<Vec<String>>()
-            .join(";");
 
+    fn new_team_struct(id: &i32, team_name: String, player_ids_str: String) -> Self {
         Team {
             id: *id,
-            player_ids: player_ids,
+            name: team_name,
+            player_ids: player_ids_str,
         }
     }
 }
 #[cfg(test)]
 mod team_test {
-    use std::{thread, time};
 
     use crate::db::{
         establish_connection,
@@ -106,7 +112,7 @@ mod team_test {
     fn create_team_with_player_ids() {
         let mut conn = establish_connection().get().unwrap();
         let player_names = ["[GRE] p1", "[GRE] p2", "[GRE] p3", "[GRE] p4"];
-        let team = Team::create(player_names, &mut conn).unwrap();
+        let team = Team::create("[GRE 1]".to_string(), player_names, &mut conn).unwrap();
         let player_ids = player_names
             .iter()
             .map(|name| Player::by_name(name, &conn).unwrap().id.to_string())

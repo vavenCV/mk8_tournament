@@ -10,6 +10,7 @@ CREATE TABLE players (
 -- Create a table with an array of UUIDs
 CREATE TABLE teams (
   	id 			INTEGER PRIMARY KEY NOT NULL,
+	name 		TEXT NOT NULL,
   	player_ids 	TEXT NOT NULL
 );
 

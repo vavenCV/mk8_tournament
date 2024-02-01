@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 // src/services/user.rs
 use crate::db::{model::team::Team, DbPool};
 use actix_web::{web, HttpResponse};
@@ -5,7 +7,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct TeamForm {
-    player_names: [String; 4],
+    pub team_name: String,
+    pub player_names: [String; 4],
 }
 pub fn create(team_form: web::Json<TeamForm>, pool: web::Data<DbPool>) -> HttpResponse {
     let mut conn = pool.get().unwrap();
@@ -15,9 +18,9 @@ pub fn create(team_form: web::Json<TeamForm>, pool: web::Data<DbPool>) -> HttpRe
         str_names[index] = &name;
     }
 
-    match Team::create(str_names, &mut conn) {
+    match Team::create(team_form.team_name.deref().to_owned(), str_names, &mut conn) {
         Some(user) => HttpResponse::Ok().json(user),
-        _ => HttpResponse::InternalServerError().json("Could not create user"),
+        _ => HttpResponse::InternalServerError().json("Could not create team"),
     }
 }
 pub fn index(pool: web::Data<DbPool>) -> HttpResponse {

@@ -1,13 +1,10 @@
-use std::collections::HashMap;
 use std::error::Error;
 
-use crate::db::model::team;
 use crate::db::schema::faceoffs::dsl::faceoffs as faceoff_dsl;
 use crate::{db::schema::faceoffs, utils};
 use diesel::prelude::*;
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
-use uuid::Uuid;
 
 use super::race::Race;
 use super::team::Team;
@@ -97,7 +94,7 @@ impl Faceoff {
         team_ids: Vec<i32>,
         conn: &mut SqliteConnection,
     ) -> Option<Self> {
-        let new_id = utils::ids::get_random_unique_id(Faceoff::by_id, conn);
+        let new_id = utils::ids::get_random_unique_id(Self::by_id, conn);
 
         let new_race = Self::new_faceoff_struct(&new_id, &race_number,  None, Some(team_ids));
 
@@ -128,7 +125,7 @@ impl Faceoff {
 
         let str_race_ids = utils::ids::ids_to_string(Some(new_race_ids.to_vec()));
 
-        let updated_row = diesel::update(faceoff_dsl.filter(id.eq(query_id)))
+        let _updated_row = diesel::update(faceoff_dsl.filter(id.eq(query_id)))
             .set(race_ids.eq(str_race_ids))
             .execute(conn)?;
 
@@ -141,7 +138,7 @@ impl Faceoff {
 
         let str_team_ids = utils::ids::ids_to_string(Some(new_team_ids.to_vec()));
 
-        let updated_row = diesel::update(faceoff_dsl.filter(id.eq(query_id)))
+        let _updated_row = diesel::update(faceoff_dsl.filter(id.eq(query_id)))
             .set(team_ids.eq(str_team_ids))
             .execute(conn)?;
 
@@ -177,9 +174,8 @@ mod faceoff_test {
         db::{
             establish_connection,
             model::{
-                faceoff::Faceoff, player::Player, race::Race, race_point::RacePoints, team::Team,
+                faceoff::Faceoff, race::Race, team::Team,
             },
-            schema::teams,
         },
         utils,
     };
@@ -188,8 +184,8 @@ mod faceoff_test {
         let mut conn = establish_connection().get().unwrap();
 
         let teams = vec![
-            Team::create(["P1", "P2", "P3", "P4"], &mut conn).unwrap(),
-            Team::create(["P5", "P6", "P7", "P8"], &mut conn).unwrap(),
+            Team::create("[GRE 1]".to_string(), ["P1", "P2", "P3", "P4"], &mut conn).unwrap(),
+            Team::create("[GRE 1]".to_string(), ["P5", "P6", "P7", "P8"], &mut conn).unwrap(),
         ];
         let team_ids = teams.iter().map(|team| team.id).collect::<Vec<i32>>();
 

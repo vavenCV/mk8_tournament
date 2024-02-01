@@ -1,4 +1,4 @@
-use crate::db::schema::players;
+use crate::{db::schema::players, utils};
 use crate::db::schema::players::dsl::players as player_dsl;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -48,7 +48,7 @@ impl Player {
     }
 
     pub fn create(name: &str, team_id: i32, conn: &mut SqliteConnection) -> Option<Self> {
-        let new_id = Uuid::new_v4().as_u128() as i32;
+        let new_id = utils::ids::get_random_unique_id(Self::by_id, conn);
 
         if let Some(player) = Self::by_name(&name, conn) {
             return Some(player);

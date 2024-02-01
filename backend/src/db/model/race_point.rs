@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::db::schema::race_points;
+use crate::{db::schema::race_points, utils};
 use crate::db::schema::race_points::dsl::race_points as race_points_dsl;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -93,7 +93,7 @@ impl RacePoints {
         points: u8,
         conn: &mut SqliteConnection,
     ) -> Option<Self> {
-        let new_id = Uuid::new_v4().as_u128() as i32;
+        let new_id = utils::ids::get_random_unique_id(Self::by_id, conn);
 
         if let Some(racepoint) = Self::by_player_and_race_id(&player_id, &race_id, conn) {
             return Some(racepoint);

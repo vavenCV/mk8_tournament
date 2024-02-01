@@ -4,9 +4,9 @@
 
 First create 3 teams
 ```
-curl -i -X POST -H "Content-Type: application/json" -d '{"player_names":["[GRE] p1", "[GRE] p2", "[GRE] p3", "[GRE] p4"]}' http://localhost:5000/teams
-curl -i -X POST -H "Content-Type: application/json" -d '{"player_names":["[LYS] p1", "[LYS] p2", "[LYS] p3", "[LYS] p4"]}' http://localhost:5000/teams
-curl -i -X POST -H "Content-Type: application/json" -d '{"player_names":["[SOF] p1", "[SOF] p2", "[SOF] p3", "[SOF] p4"]}' http://localhost:5000/teams
+curl -i -X POST -H "Content-Type: application/json" -d '{"team_name": "[GRE 1]", "player_names":["[GRE 1] p1", "[GRE 1] p2", "[GRE 1] p3", "[GRE 1] p4"]}' http://localhost:5000/teams
+curl -i -X POST -H "Content-Type: application/json" -d '{"team_name": "[LYS 1]", "player_names":["[LYS 1] p1", "[LYS 1] p2", "[LYS 1] p3", "[LYS 1] p4"]}' http://localhost:5000/teams
+curl -i -X POST -H "Content-Type: application/json" -d '{"team_name": "[SOF 1]", "player_names":["[SOF 1] p1", "[SOF 1] p2", "[SOF 1] p3", "[SOF 1] p4"]}' http://localhost:5000/teams
 ```
 Then get the ids
 
