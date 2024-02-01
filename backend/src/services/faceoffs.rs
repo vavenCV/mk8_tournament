@@ -1,8 +1,5 @@
 // src/services/user.rs
-use crate::db::{
-    model::{faceoff::Faceoff},
-    DbPool,
-};
+use crate::db::{model::faceoff::Faceoff, DbPool};
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
@@ -43,7 +40,11 @@ pub fn generate(id: web::Path<i32>, pool: web::Data<DbPool>) -> HttpResponse {
         _ => HttpResponse::NotFound().json("Not Found"),
     }
 }
-pub fn update(id: web::Path<i32>, faceoff_form: web::Json<FaceoffTeamUpdate>, pool: web::Data<DbPool>) -> HttpResponse {
+pub fn update(
+    id: web::Path<i32>,
+    faceoff_form: web::Json<FaceoffTeamUpdate>,
+    pool: web::Data<DbPool>,
+) -> HttpResponse {
     let mut conn = pool.get().unwrap();
     match Faceoff::set_team_ids(&id, &faceoff_form.team_ids, &mut conn) {
         Ok(faceoff) => HttpResponse::Ok().json(faceoff),
@@ -64,8 +65,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
     )
     .service(
         web::scope("/faceoffs")
-        
-        .route("/{id}/generate", web::post().to(generate))
+            .route("/{id}/generate", web::post().to(generate))
             .route("/{id}", web::get().to(get))
             .route("/{id}", web::put().to(update)),
     );

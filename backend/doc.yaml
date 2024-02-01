@@ -20,12 +20,12 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Players'
+                  $ref: "#/components/schemas/Players"
             application/xml:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Players'
+                  $ref: "#/components/schemas/Players"
     post:
       tags:
         - players
@@ -35,23 +35,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PlayersRequestBody'
+              $ref: "#/components/schemas/PlayersRequestBody"
           application/xml:
             schema:
-              $ref: '#/components/schemas/PlayersRequestBody'
+              $ref: "#/components/schemas/PlayersRequestBody"
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PlayersRequestBody'
+              $ref: "#/components/schemas/PlayersRequestBody"
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Players'
+                $ref: "#/components/schemas/Players"
             application/xml:
               schema:
-                $ref: '#/components/schemas/Players'
+                $ref: "#/components/schemas/Players"
 
   /players/{Id}:
     get:
@@ -72,10 +72,63 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Players'
+                $ref: "#/components/schemas/Players"
             application/xml:
               schema:
-                $ref: '#/components/schemas/Players'
+                $ref: "#/components/schemas/Players"
+  /players/{Id}/total_points:
+    get:
+      tags:
+        - players
+      summary: Returns a user total points in tournament by ID.
+      parameters:
+        - name: Id
+          in: path
+          required: true
+          description: Id of the player.
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayersPointsResp"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/PlayersPointsResp"
+  /players/{Id}/total_points_in_faceoff/{faceoff_id}:
+    get:
+      tags:
+        - players
+      summary: Returns a user total points in faceoff by ID.
+      parameters:
+        - name: Id
+          in: path
+          required: true
+          description: Id of the player.
+          schema:
+            type: integer
+            format: int32
+        - name: faceoff_id
+          in: path
+          required: true
+          description: Id of the faceoff.
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayersPointsResp"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/PlayersPointsResp"
   /teams:
     get:
       tags:
@@ -89,12 +142,12 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TeamResponse'
+                  $ref: "#/components/schemas/TeamResponse"
             application/xml:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TeamResponse'
+                  $ref: "#/components/schemas/TeamResponse"
     post:
       tags:
         - teams
@@ -104,23 +157,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TeamRequestBody'
+              $ref: "#/components/schemas/TeamRequestBody"
           application/xml:
             schema:
-              $ref: '#/components/schemas/TeamRequestBody'
+              $ref: "#/components/schemas/TeamRequestBody"
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/TeamRequestBody'
+              $ref: "#/components/schemas/TeamRequestBody"
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TeamResponse'
+                $ref: "#/components/schemas/TeamResponse"
             application/xml:
               schema:
-                $ref: '#/components/schemas/TeamResponse'
+                $ref: "#/components/schemas/TeamResponse"
   /teams/{Id}:
     get:
       tags:
@@ -140,10 +193,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TeamResponse'
+                $ref: "#/components/schemas/TeamResponse"
             application/xml:
               schema:
-                $ref: '#/components/schemas/TeamResponse'
+                $ref: "#/components/schemas/TeamResponse"
   /races:
     get:
       tags:
@@ -157,12 +210,12 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RaceResponse'
+                  $ref: "#/components/schemas/RaceResponse"
             application/xml:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RaceResponse'
+                  $ref: "#/components/schemas/RaceResponse"
   /races/{Id}:
     get:
       tags:
@@ -182,10 +235,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RaceResponse'
+                $ref: "#/components/schemas/RaceResponse"
             application/xml:
               schema:
-                $ref: '#/components/schemas/RaceResponse'
+                $ref: "#/components/schemas/RaceResponse"
     put:
       tags:
         - races
@@ -203,23 +256,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RacePutPoints'
+              $ref: "#/components/schemas/RacePutPoints"
           application/xml:
             schema:
-              $ref: '#/components/schemas/RacePutPoints'
+              $ref: "#/components/schemas/RacePutPoints"
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/RacePutPoints'
+              $ref: "#/components/schemas/RacePutPoints"
       responses:
         "200": # status code
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RaceResponse'
+                $ref: "#/components/schemas/RaceResponse"
             application/xml:
               schema:
-                $ref: '#/components/schemas/RaceResponse'
+                $ref: "#/components/schemas/RaceResponse"
   /faceoffs:
     get:
       tags:
@@ -233,12 +286,12 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FaceoffResponse'
+                  $ref: "#/components/schemas/FaceoffResponse"
             application/xml:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/FaceoffResponse'
+                  $ref: "#/components/schemas/FaceoffResponse"
     post:
       tags:
         - faceoffs
@@ -248,23 +301,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FaceoffRequestBody'
+              $ref: "#/components/schemas/FaceoffRequestBody"
           application/xml:
             schema:
-              $ref: '#/components/schemas/FaceoffRequestBody'
+              $ref: "#/components/schemas/FaceoffRequestBody"
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/FaceoffRequestBody'
+              $ref: "#/components/schemas/FaceoffRequestBody"
       responses:
         "200":
           description: successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FaceoffResponse'
+                $ref: "#/components/schemas/FaceoffResponse"
             application/xml:
               schema:
-                $ref: '#/components/schemas/FaceoffResponse'
+                $ref: "#/components/schemas/FaceoffResponse"
   /faceoffs/{Id}:
     get:
       tags:
@@ -284,10 +337,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FaceoffResponse'
+                $ref: "#/components/schemas/FaceoffResponse"
             application/xml:
               schema:
-                $ref: '#/components/schemas/FaceoffResponse'
+                $ref: "#/components/schemas/FaceoffResponse"
 components:
   schemas:
     PlayersRequestBody:
@@ -302,22 +355,29 @@ components:
           example: "[GRE] p1"
     Players:
       allOf:
-        - $ref: '#/components/schemas/PlayersRequestBody'
+        - $ref: "#/components/schemas/PlayersRequestBody"
         - type: object
           properties:
             id:
               type: integer
               format: int32
               example: -2536847
+    PlayersPointsResp:
+      type: object
+      properties:
+        total_points:
+          type: integer
+          format: uint32
+          example: 526
     TeamRequestBody:
       type: object
       properties:
-        team_name: 
+        team_name:
           type: string
           example: "[GRE 1]"
         player_names:
           type: array
-          items: 
+          items:
             type: string
           example: ["[GRE] p1", "[GRE] p2", "[GRE] p3", "[GRE] p4"]
     TeamResponse:
@@ -327,7 +387,7 @@ components:
           type: integer
           format: int32
           example: -2536847
-        name: 
+        name:
           type: string
           example: "[GRE 1]"
         player_ids:
@@ -335,7 +395,7 @@ components:
           items:
             type: integer
             format: int32
-          example: [-8951576,5894477,2525689,-7745123]
+          example: [-8951576, 5894477, 2525689, -7745123]
     RacePointsCreation:
       type: object
       properties:
@@ -352,8 +412,8 @@ components:
       properties:
         race_points:
           type: array
-          items: 
-            $ref: '#/components/schemas/RacePointsCreation'
+          items:
+            $ref: "#/components/schemas/RacePointsCreation"
           # example: "race_points": [{"player_id": 1555480604, "points": 15}, {"player_id": 1431639362, "points": 12}, {"player_id": 1237765841, "points": 10}, {"player_id": -112902154, "points": 8}, {"player_id": -201583806, "points": 7}, {"player_id": -225324610, "points": 5}, {"player_id": -326015235, "points": 5}, {"player_id": -364038806, "points": 4}, {"player_id": -469872453, "points": 3}, {"player_id": -880137878, "points": 2}, {"player_id": -959482049, "points": 1}, {"player_id": -1026797181, "points": 0}]
     RaceResponse:
       type: object
@@ -367,7 +427,7 @@ components:
           items:
             type: integer
             format: int32
-          example: [-8951576,5894477,2525689,-7745123]
+          example: [-8951576, 5894477, 2525689, -7745123]
         faceoff_id:
           type: integer
           format: int32
@@ -377,7 +437,7 @@ components:
           items:
             type: integer
             format: int32
-          example: [-8951576,5894477,2525689,-7745123]
+          example: [-8951576, 5894477, 2525689, -7745123]
     FaceoffRequestBody:
       type: object
       properties:
@@ -387,11 +447,11 @@ components:
           example: 6
         team_ids:
           type: array
-          items: 
+          items:
             type: integer
             format: int32
             example: -2536847
-          example: [-8951576,5894477,2525689]
+          example: [-8951576, 5894477, 2525689]
     FaceoffResponse:
       type: object
       properties:
@@ -408,11 +468,11 @@ components:
           items:
             type: integer
             format: int32
-          example: [-47475223,-7745123,2525689,5894477]
+          example: [-47475223, -7745123, 2525689, 5894477]
         team_ids:
           type: array
-          items: 
+          items:
             type: integer
             format: int32
             example: -2536847
-          example: [-8951576,5894477,2525689]
+          example: [-8951576, 5894477, 2525689]

@@ -35,7 +35,6 @@ fn main() -> std::io::Result<()> {
     println!("🍄🍄 Mario Kart 🍄🍄 Server started on localhost:5000");
 
     sys.block_on(srv)
-
 }
 
 #[cfg(test)]
@@ -47,11 +46,11 @@ mod main_tests {
     use crate::db::model::faceoff::FaceoffResp;
     use crate::db::model::race::RaceResp;
     use crate::db::model::team::TeamResp;
+    use crate::main;
     use crate::services::faceoffs::FaceoffForm;
-    use crate::services::players::PlayerForm;
+    use crate::services::players::{PlayerForm, PlayerPointsResp};
     use crate::services::races::{RaceForm, RacePointForm, RaceStatus};
     use crate::services::teams::TeamForm;
-    use crate::main;
     use reqwest::blocking::Client;
 
     const SERVER_URL: &str = "http://localhost:5000";
@@ -104,11 +103,17 @@ mod main_tests {
         Ok(())
     }
 
-    fn set_points_for_race(client: &Client, race_id: &i32, player_point: &RaceForm) -> Result<(), Box<dyn Error>> {
-        client.put(format!("{SERVER_URL}/races/{}", *race_id)).json(&player_point).send()?;
+    fn set_points_for_race(
+        client: &Client,
+        race_id: &i32,
+        player_point: &RaceForm,
+    ) -> Result<(), Box<dyn Error>> {
+        client
+            .put(format!("{SERVER_URL}/races/{}", *race_id))
+            .json(&player_point)
+            .send()?;
         Ok(())
     }
-
 
     /// GET
     fn get_player_point(player_ids: &Vec<i32>) -> RaceForm {
@@ -116,7 +121,7 @@ mod main_tests {
         let mut race_form = RaceForm::default();
 
         for (index, player_id) in player_ids.iter().enumerate() {
-            race_form.race_points.push(RacePointForm{
+            race_form.race_points.push(RacePointForm {
                 player_id: *player_id,
                 points: POINTS_BY_ORDER[index],
             });
@@ -124,22 +129,25 @@ mod main_tests {
         race_form
     }
 
-    fn get_race(client: &Client, race_id: i32) -> Result<RaceResp, reqwest::Error>{
+    fn get_race(client: &Client, race_id: i32) -> Result<RaceResp, reqwest::Error> {
         client
             .get(format!("{SERVER_URL}/races/{race_id}"))
-            .send()?.json::<RaceResp>()
+            .send()?
+            .json::<RaceResp>()
     }
 
-    fn get_race_status(client: &Client, race_id: i32) -> Result<RaceStatus, reqwest::Error>{
+    fn get_race_status(client: &Client, race_id: i32) -> Result<RaceStatus, reqwest::Error> {
         client
             .get(format!("{SERVER_URL}/races/{race_id}/status"))
-            .send()?.json::<RaceStatus>()
+            .send()?
+            .json::<RaceStatus>()
     }
 
-    fn get_team(client: &Client, race_id: i32) -> Result<TeamResp, reqwest::Error>{
+    fn get_team(client: &Client, race_id: i32) -> Result<TeamResp, reqwest::Error> {
         client
             .get(format!("{SERVER_URL}/teams/{race_id}"))
-            .send()?.json::<TeamResp>()
+            .send()?
+            .json::<TeamResp>()
     }
 
     #[test]
@@ -154,14 +162,15 @@ mod main_tests {
 
         let teams = create_teams(&client).unwrap();
         let faceoff = create_faceoff(&client, teams.iter().map(|t| t.id).collect()).unwrap();
-        generate_faceoff_races(&client,faceoff.id).unwrap();
+        generate_faceoff_races(&client, faceoff.id).unwrap();
 
-        let faceoffs = client.get(format!("{SERVER_URL}/faceoffs")).send()
+        let faceoffs = client
+            .get(format!("{SERVER_URL}/faceoffs"))
+            .send()
             .unwrap()
             .json::<Vec<FaceoffResp>>()
             .unwrap();
-        let faceoffs_with_races = faceoffs
-            .first().unwrap();
+        let faceoffs_with_races = faceoffs.first().unwrap();
 
         // > ASSERT Faceoff is created and has `RACE_NUMBER` races
         assert_eq!(faceoffs_with_races.id, faceoff.id);
@@ -172,15 +181,23 @@ mod main_tests {
         // ## Add points to players for race
 
         let race_id_to_test = faceoffs_with_races.race_ids.first().unwrap();
+        let race_id_second_to_test = faceoffs_with_races.race_ids.get(2).unwrap();
 
         let race = get_race(&client, *race_id_to_test).unwrap();
-        
-        let player_ids = race.team_ids.iter().map(|tid| get_team(&client, *tid).unwrap().player_ids).collect::<Vec<Vec<i32>>>().concat();
+
+        let player_ids = race
+            .team_ids
+            .iter()
+            .map(|tid| get_team(&client, *tid).unwrap().player_ids)
+            .collect::<Vec<Vec<i32>>>()
+            .concat();
 
         // #-# Create one Vec of 11 and one vec of 12
         let full_player_points = get_player_point(&player_ids);
         let mut truncated_player_point = full_player_points.clone();
-        truncated_player_point.race_points.truncate(player_ids.len() - 1);
+        truncated_player_point
+            .race_points
+            .truncate(player_ids.len() - 1);
 
         let race_status = get_race_status(&client, *race_id_to_test).unwrap();
         assert_eq!(race_status.is_ended, false);
@@ -195,6 +212,27 @@ mod main_tests {
         let race_status = get_race_status(&client, *race_id_to_test).unwrap();
         assert_eq!(race_status.is_ended, true);
 
-    }
+        set_points_for_race(&client, race_id_second_to_test, &full_player_points).unwrap();
 
+        let player_id_to_test = player_ids.first().unwrap();
+        let total_points = client
+            .get(format!(
+                "{SERVER_URL}/players/{player_id_to_test}/total_points"
+            ))
+            .send()
+            .unwrap()
+            .json::<PlayerPointsResp>()
+            .unwrap();
+
+        let total_points = client
+            .get(format!(
+                "{SERVER_URL}/players/{player_id_to_test}/total_points"
+            ))
+            .send()
+            .unwrap()
+            .json::<PlayerPointsResp>()
+            .unwrap();
+
+        dbg!(total_points);
+    }
 }

@@ -1,7 +1,17 @@
+use std::ops::Deref;
+
 // src/services/user.rs
-use crate::db::{model::player::Player, DbPool};
+use crate::db::{
+    model::{player::Player, race::Race, race_point::RacePoints},
+    DbPool,
+};
 use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PlayerPointsResp {
+    pub total_points: u32,
+}
 #[derive(Serialize, Deserialize)]
 pub struct PlayerForm {
     pub team_id: i32,
@@ -25,6 +35,41 @@ pub fn get(id: web::Path<i32>, pool: web::Data<DbPool>) -> HttpResponse {
         _ => HttpResponse::NotFound().json("Not Found"),
     }
 }
+pub fn get_total_points(id: web::Path<i32>, pool: web::Data<DbPool>) -> HttpResponse {
+    let conn = pool.get().unwrap();
+
+    match RacePoints::by_player_id(&id, &conn) {
+        Some(race_points) => {
+            let total_points: u32 = race_points.iter().map(|r| r.points as u32).sum();
+            HttpResponse::Ok().json(PlayerPointsResp { total_points })
+        }
+        _ => HttpResponse::NotFound().json("Not Found"),
+    }
+}
+pub fn get_total_points_in_faceoff(
+    id: web::Path<i32>,
+    faceoff_id: web::Path<i32>,
+    pool: web::Data<DbPool>,
+) -> HttpResponse {
+    let conn = pool.get().unwrap();
+
+    match RacePoints::by_player_id(&id, &conn) {
+        Some(race_points) => {
+            let total_points: u32 = race_points
+                .iter()
+                .filter(|r| {
+                    Race::by_id(&r.race_id, &conn)
+                        .unwrap()
+                        .faceoff_id
+                        .eq(&Some(*faceoff_id.deref()))
+                })
+                .map(|r| r.points as u32)
+                .sum();
+            HttpResponse::Ok().json(PlayerPointsResp { total_points })
+        }
+        _ => HttpResponse::NotFound().json("Not Found"),
+    }
+}
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     /*
      * index: curl -i -X GET -H "Content-Type: application/json" http://localhost:5000/players
@@ -37,5 +82,13 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
             .route(web::post().to(create))
             .route(web::get().to(index)),
     )
-    .service(web::scope("/players").route("/{id}", web::get().to(get)));
+    .service(
+        web::scope("/players")
+            .route("/{id}", web::get().to(get))
+            .route("/{id}/total_points", web::get().to(get_total_points))
+            .route(
+                "/{id}/total_points_in_faceoff/{faceoff_id}",
+                web::get().to(get_total_points_in_faceoff),
+            ),
+    );
 }
