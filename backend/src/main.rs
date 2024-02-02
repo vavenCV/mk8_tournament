@@ -143,11 +143,23 @@ mod main_tests {
             .json::<RaceStatus>()
     }
 
-    fn get_team(client: &Client, race_id: i32) -> Result<TeamResp, reqwest::Error> {
+    fn get_team(client: &Client, team_id: i32) -> Result<TeamResp, reqwest::Error> {
         client
-            .get(format!("{SERVER_URL}/teams/{race_id}"))
+            .get(format!("{SERVER_URL}/teams/{team_id}"))
             .send()?
             .json::<TeamResp>()
+    }
+
+    fn get_faceoff(client: &Client, faceoff_id: i32) -> Result<FaceoffResp, reqwest::Error> {
+        client
+            .get(format!("{SERVER_URL}/facoffs/{faceoff_id}"))
+            .send()?
+            .json::<FaceoffResp>()
+    }
+
+    fn create_faceoffs_with_races_and_points(client: &Client, team_ids: Vec<i32>) {
+        let faceoff = create_faceoff(&client, team_ids).unwrap();
+        generate_faceoff_races(&client, faceoff.id).unwrap();
     }
 
     #[test]
@@ -164,6 +176,7 @@ mod main_tests {
         let faceoff = create_faceoff(&client, teams.iter().map(|t| t.id).collect()).unwrap();
         generate_faceoff_races(&client, faceoff.id).unwrap();
 
+        let faceoff = get_faceoff(&client, faceoff.id).unwrap();
         let faceoffs = client
             .get(format!("{SERVER_URL}/faceoffs"))
             .send()
@@ -224,9 +237,16 @@ mod main_tests {
             .json::<PlayerPointsResp>()
             .unwrap();
 
-        let total_points = client
+        let second_faceoff = create_faceoff(&client, teams.iter().map(|t| t.id).collect()).unwrap();
+        generate_faceoff_races(&client, second_faceoff.id).unwrap();
+        let second_faceoff = get_faceoff(&client, second_faceoff.id).unwrap();
+
+        set_points_for_race(&client, race_id_second_to_test, &full_player_points).unwrap();
+
+        let total_points_in_second_faceoff = client
             .get(format!(
-                "{SERVER_URL}/players/{player_id_to_test}/total_points"
+                "{SERVER_URL}/players/{player_id_to_test}/total_points_in_faceoff{}",
+                second_faceoff.id
             ))
             .send()
             .unwrap()
