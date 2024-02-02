@@ -157,44 +157,20 @@ mod main_tests {
             .json::<FaceoffResp>()
     }
 
-    fn create_faceoffs_with_races_and_points(client: &Client, team_ids: Vec<i32>) {
+    // Create a faceoff of 6 race between 3 teams, then add points for the first 2 races
+    fn create_faceoff_with_races_and_points(client: &Client, team_ids: Vec<i32>) -> i32 {
         let faceoff = create_faceoff(&client, team_ids).unwrap();
         generate_faceoff_races(&client, faceoff.id).unwrap();
-    }
-
-    #[test]
-    fn create_env() {
-        let main_thread = thread::spawn(|| main());
-
-        thread::sleep(Duration::from_secs(1));
-
-        let client = Client::new();
-
-        // ## GENERATE 3 TEAMS and a faceoff with those 3 teams
-
-        let teams = create_teams(&client).unwrap();
-        let faceoff = create_faceoff(&client, teams.iter().map(|t| t.id).collect()).unwrap();
-        generate_faceoff_races(&client, faceoff.id).unwrap();
-
         let faceoff = get_faceoff(&client, faceoff.id).unwrap();
-        let faceoffs = client
-            .get(format!("{SERVER_URL}/faceoffs"))
-            .send()
-            .unwrap()
-            .json::<Vec<FaceoffResp>>()
-            .unwrap();
-        let faceoffs_with_races = faceoffs.first().unwrap();
 
         // > ASSERT Faceoff is created and has `RACE_NUMBER` races
-        assert_eq!(faceoffs_with_races.id, faceoff.id);
-        assert_eq!(faceoffs_with_races.race_ids.is_empty(), false);
-        assert_eq!(faceoffs_with_races.race_ids.len(), RACE_NUMBER as usize);
+        assert_eq!(faceoff.id, faceoff.id);
+        assert_eq!(faceoff.race_ids.is_empty(), false);
+        assert_eq!(faceoff.race_ids.len(), RACE_NUMBER as usize);
         // < End of ASSERTS
 
-        // ## Add points to players for race
-
-        let race_id_to_test = faceoffs_with_races.race_ids.first().unwrap();
-        let race_id_second_to_test = faceoffs_with_races.race_ids.get(2).unwrap();
+        let race_id_to_test = faceoff.race_ids.first().unwrap();
+        let race_id_second_to_test = faceoff.race_ids.get(2).unwrap();
 
         let race = get_race(&client, *race_id_to_test).unwrap();
 
@@ -227,7 +203,26 @@ mod main_tests {
 
         set_points_for_race(&client, race_id_second_to_test, &full_player_points).unwrap();
 
-        let player_id_to_test = player_ids.first().unwrap();
+        faceoff.id
+    }
+
+    #[test]
+    fn create_env() {
+        let main_thread = thread::spawn(|| main());
+
+        thread::sleep(Duration::from_secs(1));
+
+        let client = Client::new();
+
+        // ## GENERATE 3 TEAMS and a faceoff with those 3 teams
+
+        let teams = create_teams(&client).unwrap();
+
+        let first_faceoff_id = create_faceoff_with_races_and_points(&client, teams.iter().map(|t| t.id).collect());
+        let second_faceoff_id = create_faceoff_with_races_and_points(&client, teams.iter().map(|t| t.id).collect());
+
+        let player_id_to_test = teams.first().unwrap().player_ids.first().unwrap();
+
         let total_points = client
             .get(format!(
                 "{SERVER_URL}/players/{player_id_to_test}/total_points"
@@ -237,16 +232,9 @@ mod main_tests {
             .json::<PlayerPointsResp>()
             .unwrap();
 
-        let second_faceoff = create_faceoff(&client, teams.iter().map(|t| t.id).collect()).unwrap();
-        generate_faceoff_races(&client, second_faceoff.id).unwrap();
-        let second_faceoff = get_faceoff(&client, second_faceoff.id).unwrap();
-
-        set_points_for_race(&client, race_id_second_to_test, &full_player_points).unwrap();
-
         let total_points_in_second_faceoff = client
             .get(format!(
-                "{SERVER_URL}/players/{player_id_to_test}/total_points_in_faceoff{}",
-                second_faceoff.id
+                "{SERVER_URL}/players/{player_id_to_test}/total_points_in_faceoff/{second_faceoff_id}"
             ))
             .send()
             .unwrap()
@@ -254,5 +242,6 @@ mod main_tests {
             .unwrap();
 
         dbg!(total_points);
+        dbg!(total_points_in_second_faceoff);
     }
 }
