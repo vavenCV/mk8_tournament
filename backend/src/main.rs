@@ -64,6 +64,7 @@ mod main_tests {
     ];
 
     const RACE_NUMBER: i32 = 6;
+    const POINTS_BY_ORDER: [u8; 12] = [15, 12, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 
     /// CREATE
     fn create_teams(client: &Client) -> Result<Vec<TeamResp>, Box<dyn Error>> {
@@ -117,7 +118,6 @@ mod main_tests {
 
     /// GET
     fn get_player_point(player_ids: &Vec<i32>) -> RaceForm {
-        const POINTS_BY_ORDER: [u8; 12] = [15, 12, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
         let mut race_form = RaceForm::default();
 
         for (index, player_id) in player_ids.iter().enumerate() {
@@ -214,9 +214,15 @@ mod main_tests {
 
         let client = Client::new();
 
-        // ## GENERATE 3 TEAMS and a faceoff with those 3 teams
+        // ## GENERATE 3 TEAMS and 2 faceoff with those 3 teams
 
         let teams = create_teams(&client).unwrap();
+
+        let player_ids = teams
+            .iter()
+            .map(|t| t.player_ids.clone())
+            .collect::<Vec<Vec<i32>>>()
+            .concat();
 
         let _first_faceoff_id =
             create_faceoff_with_races_and_points(&client, teams.iter().map(|t| t.id).collect());
@@ -225,25 +231,41 @@ mod main_tests {
 
         let player_id_to_test = teams.first().unwrap().player_ids.first().unwrap();
 
-        let total_points = client
-            .get(format!(
-                "{SERVER_URL}/players/{player_id_to_test}/total_points"
-            ))
-            .send()
-            .unwrap()
-            .json::<PlayerPointsResp>()
-            .unwrap();
+        let points_by_players_tournament = POINTS_BY_ORDER
+            .iter()
+            .map(|p| *p as u32 * 4)
+            .collect::<Vec<u32>>();
+        let points_by_players_in_faceoff = POINTS_BY_ORDER
+            .iter()
+            .map(|p| *p as u32 * 2)
+            .collect::<Vec<u32>>();
 
-        let total_points_in_second_faceoff = client
-            .get(format!(
-                "{SERVER_URL}/players/{player_id_to_test}/total_points_in_faceoff/{second_faceoff_id}"
-            ))
-            .send()
-            .unwrap()
-            .json::<PlayerPointsResp>()
-            .unwrap();
+        for index in 0..player_ids.len() {
+            let pid = player_ids.get(index).unwrap();
+            let points_in_tournament = points_by_players_tournament.get(index).unwrap();
+            let points_in_faceoff = points_by_players_in_faceoff.get(index).unwrap();
 
-        dbg!(total_points);
-        dbg!(total_points_in_second_faceoff);
+            let total_points = client
+                .get(format!("{SERVER_URL}/players/{pid}/total_points"))
+                .send()
+                .unwrap()
+                .json::<PlayerPointsResp>()
+                .unwrap();
+
+            let total_points_in_second_faceoff = client
+                .get(format!(
+                    "{SERVER_URL}/players/{pid}/total_points_in_faceoff/{second_faceoff_id}"
+                ))
+                .send()
+                .unwrap()
+                .json::<PlayerPointsResp>()
+                .unwrap();
+
+            assert_eq!(&total_points.total_points, points_in_tournament);
+            assert_eq!(
+                &total_points_in_second_faceoff.total_points,
+                points_in_faceoff
+            );
+        }
     }
 }
