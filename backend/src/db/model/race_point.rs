@@ -1,5 +1,5 @@
-use crate::{db::schema::race_points, utils};
 use crate::db::schema::race_points::dsl::race_points as race_points_dsl;
+use crate::{db::schema::race_points, utils};
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize, Serialize, Queryable, Insertable)]
@@ -113,36 +113,36 @@ impl RacePoints {
         }
     }
 }
-#[cfg(test)]
-mod player_test {
-    use crate::db::{
-        establish_connection,
-        model::{
-            player::Player,
-            race::Race,
-            race_point::{self, RacePoints},
-            team::Team,
-        },
-    };
-    // #[test]
-    // fn create_race_points() {
-    //     let mut conn = establish_connection().get().unwrap();
+// #[cfg(test)]
+// mod player_test {
+//     use crate::db::{
+//         establish_connection,
+//         model::{
+//             player::Player,
+//             race::Race,
+//             race_point::{self, RacePoints},
+//             team::Team,
+//         },
+//     };
+// #[test]
+// fn create_race_points() {
+//     let mut conn = establish_connection().get().unwrap();
 
-    //     let player_name = "[GRE] p1";
-    //     let player_points = 15;
+//     let player_name = "[GRE] p1";
+//     let player_points = 15;
 
-    //     let team = Team::create(["P1", "P2", "P3", "P4"], &mut conn).unwrap();
+//     let team = Team::create(["P1", "P2", "P3", "P4"], &mut conn).unwrap();
 
-    //     let player = Player::create(player_name, team.id, &mut conn).unwrap();
-    //     let race = Race::create(vec![team.id], None, None, &mut conn).unwrap();
+//     let player = Player::create(player_name, team.id, &mut conn).unwrap();
+//     let race = Race::create(vec![team.id], None, None, &mut conn).unwrap();
 
-    //     let race_points = RacePoints::create(player.id, race.id, player_points, &mut conn).unwrap();
+//     let race_points = RacePoints::create(player.id, race.id, player_points, &mut conn).unwrap();
 
-    //     let player_from_id = Player::by_id(&race_points.player_ id, &conn).unwrap();
+//     let player_from_id = Player::by_id(&race_points.player_ id, &conn).unwrap();
 
-    //     assert_eq!(player_from_id.name, player_name);
-    //     assert_eq!(race_points.points as u8, player_points);
-}
+//     assert_eq!(player_from_id.name, player_name);
+//     assert_eq!(race_points.points as u8, player_points);
+// }
 // #[test]
 // fn create_player_with_existing_name() {
 //     let mut conn = establish_connection().get().unwrap();

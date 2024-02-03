@@ -47,13 +47,12 @@ pub fn get_total_points(id: web::Path<i32>, pool: web::Data<DbPool>) -> HttpResp
     }
 }
 pub fn get_total_points_in_faceoff(
-    id: web::Path<i32>,
-    faceoff_id: web::Path<i32>,
+    info: web::Path<(i32, i32)>,
     pool: web::Data<DbPool>,
 ) -> HttpResponse {
     let conn = pool.get().unwrap();
-
-    match RacePoints::by_player_id(&id, &conn) {
+    let (player_id, faceoff_id) = info.into_inner();
+    match RacePoints::by_player_id(&player_id, &conn) {
         Some(race_points) => {
             let total_points: u32 = race_points
                 .iter()
@@ -61,7 +60,7 @@ pub fn get_total_points_in_faceoff(
                     Race::by_id(&r.race_id, &conn)
                         .unwrap()
                         .faceoff_id
-                        .eq(&Some(*faceoff_id.deref()))
+                        .eq(&Some(faceoff_id))
                 })
                 .map(|r| r.points as u32)
                 .sum();
@@ -83,11 +82,11 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
             .route(web::get().to(index)),
     )
     .service(
-        web::scope("/players")
-            .route("/{id}", web::get().to(get))
-            .route("/{id}/total_points", web::get().to(get_total_points))
+        web::scope("/players/{id}")
+            .route("", web::get().to(get))
+            .route("/total_points", web::get().to(get_total_points))
             .route(
-                "/{id}/total_points_in_faceoff/{faceoff_id}",
+                "/total_points_in_faceoff/{faceoff_id}",
                 web::get().to(get_total_points_in_faceoff),
             ),
     );

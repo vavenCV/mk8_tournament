@@ -152,7 +152,7 @@ mod main_tests {
 
     fn get_faceoff(client: &Client, faceoff_id: i32) -> Result<FaceoffResp, reqwest::Error> {
         client
-            .get(format!("{SERVER_URL}/facoffs/{faceoff_id}"))
+            .get(format!("{SERVER_URL}/faceoffs/{faceoff_id}"))
             .send()?
             .json::<FaceoffResp>()
     }
@@ -208,7 +208,7 @@ mod main_tests {
 
     #[test]
     fn create_env() {
-        let main_thread = thread::spawn(|| main());
+        let _main_thread = thread::spawn(|| main());
 
         thread::sleep(Duration::from_secs(1));
 
@@ -218,8 +218,10 @@ mod main_tests {
 
         let teams = create_teams(&client).unwrap();
 
-        let first_faceoff_id = create_faceoff_with_races_and_points(&client, teams.iter().map(|t| t.id).collect());
-        let second_faceoff_id = create_faceoff_with_races_and_points(&client, teams.iter().map(|t| t.id).collect());
+        let _first_faceoff_id =
+            create_faceoff_with_races_and_points(&client, teams.iter().map(|t| t.id).collect());
+        let second_faceoff_id =
+            create_faceoff_with_races_and_points(&client, teams.iter().map(|t| t.id).collect());
 
         let player_id_to_test = teams.first().unwrap().player_ids.first().unwrap();
 

@@ -213,7 +213,7 @@ mod player_test {
     use crate::{
         db::{
             establish_connection,
-            model::{player::Player, race::Race, race_point::RacePoints, team::Team},
+            model::{race::Race, race_point::RacePoints, team::Team},
         },
         utils,
     };
@@ -223,7 +223,8 @@ mod player_test {
 
         let points = 15;
 
-        let team = Team::create("[GRE 1]".to_string(), ["P1", "P2", "P3", "P4"], &mut conn).unwrap();
+        let team =
+            Team::create("[GRE 1]".to_string(), ["P1", "P2", "P3", "P4"], &mut conn).unwrap();
 
         let mut race = Race::create(vec![team.id], None, None, &mut conn).unwrap();
 
