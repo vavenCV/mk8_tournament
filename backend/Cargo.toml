@@ -15,6 +15,7 @@ uuid = { version = "0.8", features = ["serde", "v4"] }
 diesel_migrations = "1.4.0"
 actix-web = "3.0.0-alpha.1"
 actix-cors = "0.5.4"
+actix-session = { version = "0.7.1", features = ["cookie-session"] }
 diesel = { version = "1.4.4", features = [
     "sqlite",
     "uuidv07",
@@ -24,3 +25,4 @@ diesel = { version = "1.4.4", features = [
 r2d2 = "0.8.8"
 r2d2-diesel = "1.0.0"
 reqwest = { version = "0.11", features = ["blocking", "json"] }
+argon2 = "0.4.1"

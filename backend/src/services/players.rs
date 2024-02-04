@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 // src/services/user.rs
 use crate::db::{
     model::{player::Player, race::Race, race_point::RacePoints},
