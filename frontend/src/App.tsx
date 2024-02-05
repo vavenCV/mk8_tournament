@@ -32,11 +32,10 @@ function TeamList() {
     api
       .get("/teams")
       .then((res: AxiosResponse) => {
-        // console.debug(res);
         setTeams(res.data);
       })
       .catch((err) => {
-        // console.debug(err);
+        console.debug(err);
       });
   }, []);
 
@@ -121,11 +120,10 @@ function MKTourTabs() {
     api
       .get("/players")
       .then((res: AxiosResponse) => {
-        // console.log(res);
         setPlayers(res.data);
       })
       .catch((err) => {
-        // console.log(err);
+        console.debug(err);
       });
   }, []);
 
@@ -133,11 +131,10 @@ function MKTourTabs() {
     api
       .get("/teams")
       .then((res: AxiosResponse) => {
-        // console.log(res);
         setTeams(res.data);
       })
       .catch((err) => {
-        // console.log(err);
+        console.debug(err);
       });
   }, []);
 

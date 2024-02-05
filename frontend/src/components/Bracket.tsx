@@ -16,12 +16,16 @@ function LabelInABox({ x, y, label }: { x: number; y: number; label: string }) {
         width={BOX_WIDTH}
         height={BOX_HEIGHT}
         // winner green
-        fill="#5FAD41"
+        // fill="#5FAD41"
         // 2nd place orange
         // fill="#F5853F"
         // loser red
         // fill="#D0012E"
-        fillOpacity={1.0}
+        // fillOpacity={1.0}
+
+        // Undecided
+        fillOpacity={0.0}
+        //
         strokeWidth={1}
         stroke="#000"
         rx={1}
@@ -29,7 +33,10 @@ function LabelInABox({ x, y, label }: { x: number; y: number; label: string }) {
       <text
         x={x + 9}
         y={y + BOX_HEIGHT / 2 + 1}
-        fill="#ffffffdd"
+        // Decided
+        // fill="#ffffffdd"
+        // Undecided
+        fill="black"
         fontSize={12}
         fontFamily="Arial"
         dominantBaseline={"middle"}
