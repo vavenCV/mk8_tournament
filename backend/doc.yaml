@@ -463,6 +463,10 @@ components:
           type: integer
           format: uint8
           example: 6
+        phase_id:
+          type: integer
+          format: int32
+          example: -5894477
         race_ids:
           type: array
           items:

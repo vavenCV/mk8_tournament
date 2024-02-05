@@ -32,15 +32,16 @@ CREATE TABLE races (
 
 -- Create a table with an array of UUIDs
 CREATE TABLE faceoffs (
-  	id 			INTEGER PRIMARY KEY NOT NULL,
-	race_number INTEGER NOT NULL,
-	race_ids 	TEXT,
-	team_ids 	TEXT
+  	id 				INTEGER PRIMARY KEY NOT NULL,
+	race_number 	INTEGER NOT NULL,
+	phase_id		INTEGER NOT NULL,
+	race_ids 		TEXT,
+	team_ids 		TEXT
 );
 
 -- Create a table with an array of UUIDs
 CREATE TABLE phases (
   	id 				INTEGER PRIMARY KEY NOT NULL,
-	phase_number 	INTEGER NOT NULL,	-- higher is later in tournament
+	phase_number 	INTEGER NOT NULL,
 	faceoff_ids 	TEXT
 );

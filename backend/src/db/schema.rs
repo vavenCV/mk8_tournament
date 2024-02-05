@@ -4,16 +4,9 @@ diesel::table! {
     faceoffs (id) {
         id -> Integer,
         race_number -> Integer,
+        phase_id -> Integer,
         race_ids -> Nullable<Text>,
         team_ids -> Nullable<Text>,
-    }
-}
-
-diesel::table! {
-    phase (id) {
-        id -> Integer,
-        phase_number -> Integer,
-        faceoff_ids -> Nullable<Text>,
     }
 }
 
@@ -61,7 +54,6 @@ diesel::table! {
 
 diesel::allow_tables_to_appear_in_same_query!(
     faceoffs,
-    phase,
     phases,
     players,
     race_points,
