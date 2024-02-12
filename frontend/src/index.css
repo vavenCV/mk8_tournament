@@ -20,7 +20,7 @@ body {
   margin: 0;
   /* overflow: scroll; */
   max-height: 100vh;
-  overflow: hidden;
+  /* overflow: hidden; */
   /* display: flex; */
   /* place-items: center; */
   /* height: 100vh; */
